@@ -4,9 +4,9 @@ import rehypeImageToolkit from 'rehype-image-toolkit';
 import rehypeUnwrapImages from 'rehype-unwrap-images';
 import { z } from 'zod';
 
-const posts = defineCollection({
-  name: 'posts',
-  directory: 'src/posts',
+const pages = defineCollection({
+  name: 'pages',
+  directory: 'src/pages',
   include: '*.mdx',
   schema: z.object({
     title: z.string(),
@@ -25,5 +25,5 @@ const posts = defineCollection({
 });
 
 export default defineConfig({
-  collections: [posts],
+  collections: [pages],
 });

@@ -1,15 +1,15 @@
 import { MDXContent } from '@content-collections/mdx/react';
-import { allPosts } from 'content-collections';
+import { allPages } from 'content-collections';
 import { GodOmsorgLogo } from '@/components/god-omsorg';
 import { JobMetaCard } from '@/components/job-meta';
 import { ShaStamp } from '@/components/sha';
 
 function App() {
-  const helloPost = allPosts.find(
-    (post) => post._meta.fileName === 'hello2.mdx',
+  const indexPage = allPages.find(
+    (page) => page._meta.fileName === 'index.mdx',
   );
 
-  if (!helloPost) {
+  if (!indexPage) {
     return <div>Inget innehåll hittades.</div>;
   }
 
@@ -22,9 +22,9 @@ function App() {
           <span>Sigtuna/Stockholm</span>
         </p>
         <h1 className="scroll-m-20 text-center text-4xl font-extrabold tracking-tight text-balance">
-          {helloPost?.title}
+          {indexPage?.title}
         </h1>
-        <MDXContent code={helloPost.mdx} />
+        <MDXContent code={indexPage.mdx} />
         <JobMetaCard
           items={[
             { label: 'Typ av tjänst', value: '75-100%' },
