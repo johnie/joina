@@ -37,18 +37,21 @@ npm run biome:fix
 The project uses `@content-collections` for type-safe MDX content:
 
 1. **Configuration**: `content-collections.ts` defines collections with Zod schemas
-   - Currently configured with `posts` collection
-   - Content directory: `content/` (note: currently using `src/posts/` - may need migration)
+   - Currently configured with `pages` collection
+   - Content directory: `src/pages/`
    - Schema includes: `title`, `summary`, `content`
-   - MDX compilation handled automatically via `compileMDX`
+   - MDX compilation handled automatically via `compileMDX` with rehype plugins:
+     - `rehypeUnwrapImages`: Unwraps images from paragraph tags
+     - `rehypeImageToolkit`: Enhances image processing capabilities
 
 2. **Generated Types**: Content Collections generates TypeScript types at `.content-collections/generated`
-   - Import with: `import { allPosts } from 'content-collections'`
+   - Import with: `import { allPages } from 'content-collections'`
    - Path alias configured in tsconfig: `"content-collections": ["./.content-collections/generated"]`
 
 3. **Usage Pattern**: See `src/App.tsx` for reference
-   - Import posts collection: `import { allPosts } from 'content-collections'`
-   - Render with: `<MDXContent code={post.mdx} />`
+   - Import pages collection: `import { allPages } from 'content-collections'`
+   - Find specific page: `allPages.find((page) => page._meta.fileName === 'index.mdx')`
+   - Render with: `<MDXContent code={page.mdx} />`
 
 ### Path Aliases
 - `@/*` maps to `src/*` for cleaner imports
@@ -75,22 +78,23 @@ The project uses composite TypeScript configs:
 
 ## Adding New Content
 
-1. Create MDX file in `content/` directory (or `src/posts/` depending on configuration)
+1. Create MDX file in `src/pages/` directory
 2. Include frontmatter with required fields:
    ```mdx
    ---
-   title: "Post Title"
+   title: "Page Title"
    summary: "Brief description"
+   content: "Content description"
    ---
 
    # Content here
    ```
 3. Content Collections will auto-generate types on next dev/build
-4. Access via `allPosts` import from `content-collections`
+4. Access via `allPages` import from `content-collections`
 
 ## Deployment
 
 The project deploys to Cloudflare Pages:
 - Build artifacts go to `dist/` directory
 - Wrangler handles deployment (requires Cloudflare account setup)
-- No `wrangler.toml` in repo - configuration may be in Cloudflare dashboard
+- Configuration in `wrangler.jsonc` with SPA routing enabled (`not_found_handling: "single-page-application"`)
