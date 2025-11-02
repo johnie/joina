@@ -1,5 +1,6 @@
 import { MDXContent } from '@content-collections/mdx/react';
 import { allPages } from 'content-collections';
+import { ApplyCard } from '@/components/apply-card';
 import { GodOmsorgLogo } from '@/components/god-omsorg';
 import { JobMetaCard } from '@/components/job-meta';
 import { ShaStamp } from '@/components/sha';
@@ -25,6 +26,7 @@ function App() {
           {indexPage?.title}
         </h1>
         <MDXContent code={indexPage.mdx} />
+        <ApplyCard />
         <JobMetaCard
           items={[
             { label: 'Typ av tjänst', value: '75-100%' },
