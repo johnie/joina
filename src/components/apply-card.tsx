@@ -1,4 +1,5 @@
 import { Mail } from 'lucide-react';
+import { ApplicationModal } from '@/components/application-modal';
 import { Button } from '@/components/ui/button';
 import {
   Card,
@@ -17,7 +18,8 @@ export function ApplyCard() {
           Så här ansöker du
         </CardTitle>
         <CardDescription className="text-base text-stone-700 dark:text-stone-300">
-          Är du intresserad av tjänsten? Skicka din ansökan via e-post!
+          Är du intresserad av tjänsten? Ansök via vårt formulär eller skicka
+          din ansökan via e-post!
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
@@ -40,7 +42,7 @@ export function ApplyCard() {
         </div>
         <div className="rounded-lg bg-white/50 dark:bg-stone-900/50 p-4 border border-stone-200 dark:border-stone-700">
           <p className="text-sm font-medium text-stone-900 dark:text-stone-100 mb-1">
-            Skicka din ansökan till:
+            Eller skicka din ansökan till:
           </p>
           <a
             href="mailto:jobb@johnie.se?subject=Ansökan: Personlig Assistent"
@@ -55,15 +57,17 @@ export function ApplyCard() {
           som möjligt.
         </p>
       </CardContent>
-      <CardFooter>
+      <CardFooter className="flex flex-col gap-2 sm:flex-row">
+        <ApplicationModal />
         <Button
           size="lg"
-          className="w-full bg-teal-600 hover:bg-teal-700 dark:bg-teal-700 dark:hover:bg-teal-600 text-white"
+          variant="outline"
+          className="w-full sm:w-auto border-teal-600 text-teal-600 hover:bg-teal-50 dark:border-teal-400 dark:text-teal-400 dark:hover:bg-teal-950"
           asChild
         >
           <a href="mailto:jobb@johnie.se?subject=Ansökan: Personlig Assistent">
             <Mail />
-            Skicka ansökan via e-post
+            Skicka via e-post
           </a>
         </Button>
       </CardFooter>
