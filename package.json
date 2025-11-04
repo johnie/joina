@@ -10,7 +10,7 @@
 	"scripts": {
 		"dev": "vite",
 		"dev:server": "wrangler dev",
-		"build": "tsc -b && vite build",
+		"build": "vite build",
 		"preview": "npm run build && wrangler dev",
 		"deploy": "npm run build && wrangler deploy",
 		"biome:fix": "biome check --write --unsafe"
