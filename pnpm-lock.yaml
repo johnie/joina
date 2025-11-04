@@ -11,6 +11,9 @@ importers:
 
   .:
     dependencies:
+      '@fontsource-variable/geist-mono':
+        specifier: ^5.2.7
+        version: 5.2.7
       '@fontsource-variable/newsreader':
         specifier: ^5.2.10
         version: 5.2.10
@@ -672,6 +675,9 @@ packages:
 
   '@fal-works/esbuild-plugin-global-externals@2.1.2':
     resolution: {integrity: sha512-cEee/Z+I12mZcFJshKcCqC8tuX5hG3s+d+9nZ3LabqKF1vKdF41B92pJVCBggjAGORAeOzyyDDKrZwIkLffeOQ==}
+
+  '@fontsource-variable/geist-mono@5.2.7':
+    resolution: {integrity: sha512-ZKlZ5sjtalb2TwXKs400mAGDlt/+2ENLNySPx0wTz3bP3mWARCsUW+rpxzZc7e05d2qGch70pItt3K4qttbIYA==}
 
   '@fontsource-variable/newsreader@5.2.10':
     resolution: {integrity: sha512-MdI2iRwrqWpMOU/2aV2BgfZ4dJNlj/XlYaY8Zb7t87mWqHskYW0XiUANkt1cyOCiEfW2VQ0bQ5vZgGPp6B2B4w==}
@@ -2794,6 +2800,8 @@ snapshots:
     optional: true
 
   '@fal-works/esbuild-plugin-global-externals@2.1.2': {}
+
+  '@fontsource-variable/geist-mono@5.2.7': {}
 
   '@fontsource-variable/newsreader@5.2.10': {}
 
