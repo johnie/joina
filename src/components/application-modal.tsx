@@ -44,7 +44,7 @@ async function submitApplication(data: {
     formData.append('files', file);
   }
 
-  const response = await fetch('https://joina-api.crip.workers.dev/upload', {
+  const response = await fetch('/api/upload', {
     method: 'POST',
     body: formData,
   });
