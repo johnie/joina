@@ -2,10 +2,13 @@ import { zValidator } from '@hono/zod-validator';
 import { Hono } from 'hono';
 import { z } from 'zod';
 import { slugifyEmail } from '../utils/slugify';
+import { EmailMessage } from 'cloudflare:email';
+import { createMimeMessage } from 'mimetext';
 
 // Define the Cloudflare Workers environment type
 type Bindings = {
   BUCKET: R2Bucket;
+  EMAIL: SendEmail;
 };
 
 // Create a new Hono app with typed bindings
@@ -127,6 +130,33 @@ upload.post('/', zValidator('form', JobApplicationSchema), async (c) => {
         );
       }
     }
+
+    // Send application email to me
+    const msg = createMimeMessage();
+    msg.setSender({ name, addr: email });
+    msg.setRecipient('jobb@johnie.se');
+    msg.setSubject(`Ny jobbsökan från ${name}`);
+    msg.addMessage({
+      contentType: 'text/html; charset=utf-8',
+      data: `<p>En ny jobbsökan har inkommit:</p>
+             <ul>
+               <li><strong>Namn:</strong> ${name}</li>
+               <li><strong>E-post:</strong> ${email}</li>
+               <li><strong>Telefon:</strong> ${phone}</li>
+             </ul>
+             <p>Bifogade filer: ${files
+               .map((file) => file.name)
+               .join(', ')}</p>`,
+    });
+
+    const message = new EmailMessage(email, 'jobb@johnie.se', msg.asRaw());
+
+    try {
+      await c.env.EMAIL.send(message);
+    } catch (emailError) {
+      console.error('Fel vid skickande av e-post:', emailError);
+    }
+
     // Return success response
     const response = {
       success: true,
