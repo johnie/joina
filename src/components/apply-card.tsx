@@ -17,7 +17,7 @@ export function ApplyCard() {
         <CardTitle className="text-xl text-amber-600 font-heading">
           Så här ansöker du
         </CardTitle>
-        <CardDescription className="text-base text-stone-700 dark:text-stone-300">
+        <CardDescription className="text-stone-700 dark:text-stone-300">
           Är du intresserad av tjänsten? Ansök via vårt formulär eller skicka
           din ansökan via e-post!
         </CardDescription>
