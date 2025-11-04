@@ -244,17 +244,18 @@ Filerna är sparade i R2 under: ${folderName}
       htmlContent,
     });
 
-    const message = new EmailMessage(
-      'jobb@johnie.se',
-      'jobb@johnie.se',
-      rawMimeMessage,
-    );
+    const message = new EmailMessage(email, 'jobb@johnie.se', rawMimeMessage);
 
     try {
       await c.env.EMAIL.send(message);
       console.log(`Email notification sent for application from ${email}`);
     } catch (emailError) {
-      console.error('Fel vid skickande av e-post:', emailError);
+      console.error(
+        'Fel vid skickande av e-post:',
+        emailError,
+        rawMimeMessage,
+        message,
+      );
       // Don't fail the request if email fails, just log it
     }
 
