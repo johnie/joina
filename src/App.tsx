@@ -16,7 +16,7 @@ function App() {
 
   return (
     <main>
-      <article className="prose prose-stone dark:prose-invert prose-headings:text-amber-600 prose-headings:font-heading prose-ul:leading-tight prose-ol:leading-tight prose-p:leading-7 prose-p:text-md prose-a:text-teal-500 prose-a:underline-offset-4 prose-ul:list-disc marker:text-teal-500">
+      <article className="prose prose-stone dark:prose-invert prose-headings:text-amber-600 prose-headings:font-heading prose-ul:leading-tight prose-ol:leading-tight prose-p:leading-7 text-sm prose-a:text-teal-500 prose-a:underline-offset-4 prose-ul:list-disc marker:text-teal-500 max-w-full">
         <p className="text-muted-foreground text-sm text-center gap-2 flex justify-center items-center">
           <span>Personlig Assistans</span>
           <span className="text-amber-600">•</span>
@@ -41,6 +41,10 @@ function App() {
       <a href="https://godomsorg.se" target="_blank" rel="noopener noreferrer">
         <GodOmsorgLogo className="mx-auto mt-8" />
       </a>
+      <p className="text-center text-sm text-muted-foreground mt-2">
+        God Omsorg - en del av God Assistans, bedriver avlösarservice,
+        ledsagarservice och personlig Assistans.
+      </p>
       <ShaStamp />
     </main>
   );
