@@ -17,8 +17,7 @@
 	],
 	"send_email": [
 		{
-			"name": "EMAIL",
-			"allowed_destination_addresses": ["jobb@johnie.se"]
+			"name": "EMAIL"
 		}
 	],
 	"observability": {
