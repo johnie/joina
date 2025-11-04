@@ -1,4 +1,5 @@
 import { useForm } from '@tanstack/react-form';
+import { Upload, X } from 'lucide-react';
 import * as React from 'react';
 import { toast } from 'sonner';
 import { z } from 'zod';
@@ -12,6 +13,16 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '@/components/ui/dialog';
+import {
+  FileUpload,
+  FileUploadDropzone,
+  FileUploadItem,
+  FileUploadItemDelete,
+  FileUploadItemMetadata,
+  FileUploadItemPreview,
+  FileUploadList,
+  FileUploadTrigger,
+} from '@/components/ui/file-upload';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 
@@ -20,16 +31,18 @@ async function submitApplication(data: {
   name: string;
   email: string;
   phone: string;
-  resume: File | null;
-  coverLetter: File | null;
+  files: File[];
 }) {
   // Post the application data to the server
   const formData = new FormData();
   formData.append('name', data.name);
   formData.append('email', data.email);
   formData.append('phone', data.phone);
-  if (data.resume) formData.append('resume', data.resume);
-  if (data.coverLetter) formData.append('coverLetter', data.coverLetter);
+
+  // Append all files
+  for (const file of data.files) {
+    formData.append('files', file);
+  }
 
   const response = await fetch('https://joina-api.crip.workers.dev/upload', {
     method: 'POST',
@@ -73,18 +86,15 @@ export function ApplicationModal() {
       name: '',
       email: '',
       phone: '',
-      resume: null as File | null,
-      coverLetter: null as File | null,
+      files: [] as File[],
     },
     onSubmit: async ({ value }) => {
       try {
         // Validate required fields
-        if (!value.resume) {
-          toast.error('Vänligen ladda upp ditt CV');
-          return;
-        }
-        if (!value.coverLetter) {
-          toast.error('Vänligen ladda upp ditt personliga brev');
+        if (value.files.length === 0) {
+          toast.error(
+            'Vänligen ladda upp minst en fil (CV eller personligt brev)',
+          );
           return;
         }
 
@@ -221,78 +231,90 @@ export function ApplicationModal() {
             )}
           </form.Field>
 
-          {/* Resume Upload */}
-          <form.Field name="resume">
+          {/* File Upload */}
+          <form.Field
+            name="files"
+            validators={{
+              onChange: ({ value }) => {
+                if (value.length === 0) {
+                  return 'Vänligen ladda upp minst en fil';
+                }
+                if (value.length > 5) {
+                  return 'Du kan ladda upp max 5 filer';
+                }
+                return undefined;
+              },
+            }}
+          >
             {(field) => (
               <div className="space-y-2">
-                <Label htmlFor={field.name}>
-                  CV <span className="text-destructive">*</span>
+                <Label>
+                  Ladda upp filer <span className="text-destructive">*</span>
                 </Label>
-                <div className="flex items-center gap-2 min-w-0">
-                  <label
-                    htmlFor={field.name}
-                    className="inline-flex h-9 shrink-0 items-center justify-center rounded-md border border-input bg-background px-4 py-2 text-sm font-medium shadow-xs transition-colors hover:bg-accent hover:text-accent-foreground cursor-pointer"
-                  >
-                    Välj fil
-                  </label>
-                  <span className="text-muted-foreground text-sm truncate min-w-0">
-                    {field.state.value
-                      ? (field.state.value as File).name
-                      : 'Ingen fil vald'}
-                  </span>
-                </div>
-                <Input
-                  id={field.name}
-                  name={field.name}
-                  type="file"
-                  accept=".pdf,.doc,.docx"
-                  className="sr-only"
-                  onChange={(e) => {
-                    const file = e.target.files?.[0] || null;
-                    field.handleChange(file);
+                <FileUpload
+                  value={field.state.value}
+                  onValueChange={field.handleChange}
+                  accept=".pdf,.doc,.docx,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+                  maxFiles={5}
+                  maxSize={5 * 1024 * 1024}
+                  onFileReject={(_, message) => {
+                    toast.error(message);
                   }}
-                />
+                  multiple
+                >
+                  <FileUploadDropzone>
+                    <div className="flex flex-col items-center gap-1">
+                      <div className="flex items-center justify-center rounded-full border p-2.5">
+                        <Upload className="size-6 text-muted-foreground" />
+                      </div>
+                      <p className="font-medium text-sm">
+                        Dra och släpp filer här
+                      </p>
+                      <p className="text-muted-foreground text-xs">
+                        Eller klicka för att bläddra (max 5 filer)
+                      </p>
+                    </div>
+                    <FileUploadTrigger asChild>
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        className="mt-2 w-fit"
+                      >
+                        Välj filer
+                      </Button>
+                    </FileUploadTrigger>
+                  </FileUploadDropzone>
+                  {field.state.value.length > 0 && (
+                    <FileUploadList>
+                      {field.state.value.map((file, index) => (
+                        <FileUploadItem
+                          key={`${file.name}-${index}`}
+                          value={file}
+                        >
+                          <FileUploadItemPreview />
+                          <FileUploadItemMetadata />
+                          <FileUploadItemDelete asChild>
+                            <Button
+                              type="button"
+                              variant="ghost"
+                              size="icon"
+                              className="size-7"
+                            >
+                              <X className="size-4" />
+                              <span className="sr-only">Ta bort</span>
+                            </Button>
+                          </FileUploadItemDelete>
+                        </FileUploadItem>
+                      ))}
+                    </FileUploadList>
+                  )}
+                </FileUpload>
                 <p className="text-muted-foreground text-xs">
-                  Godkända format: PDF, DOC, DOCX (Max 5MB)
+                  Ladda upp ditt CV och personligt brev. Godkända format: PDF,
+                  DOC, DOCX (Max 5MB per fil, upp till 5 filer)
                 </p>
-              </div>
-            )}
-          </form.Field>
-
-          {/* Cover Letter Upload */}
-          <form.Field name="coverLetter">
-            {(field) => (
-              <div className="space-y-2">
-                <Label htmlFor={field.name}>
-                  Personligt brev <span className="text-destructive">*</span>
-                </Label>
-                <div className="flex items-center gap-2 min-w-0">
-                  <label
-                    htmlFor={field.name}
-                    className="inline-flex h-9 shrink-0 items-center justify-center rounded-md border border-input bg-background px-4 py-2 text-sm font-medium shadow-xs transition-colors hover:bg-accent hover:text-accent-foreground cursor-pointer"
-                  >
-                    Välj fil
-                  </label>
-                  <span className="text-muted-foreground text-sm truncate min-w-0">
-                    {field.state.value
-                      ? (field.state.value as File).name
-                      : 'Ingen fil vald'}
-                  </span>
-                </div>
-                <Input
-                  id={field.name}
-                  name={field.name}
-                  type="file"
-                  accept=".pdf,.doc,.docx"
-                  className="sr-only"
-                  onChange={(e) => {
-                    const file = e.target.files?.[0] || null;
-                    field.handleChange(file);
-                  }}
-                />
-                <p className="text-muted-foreground text-xs">
-                  Godkända format: PDF, DOC, DOCX (Max 5MB)
-                </p>
+                <FieldError errors={field.state.meta.errors} />
               </div>
             )}
           </form.Field>
