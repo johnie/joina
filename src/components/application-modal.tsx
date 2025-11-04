@@ -105,7 +105,9 @@ export function ApplicationModal() {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button size="lg">Ansök om tjänsten</Button>
+        <Button size="lg" className="w-full sm:w-auto">
+          Ansök om tjänsten
+        </Button>
       </DialogTrigger>
       <DialogContent className="max-h-[90vh] overflow-y-auto overflow-x-hidden sm:max-w-[600px]">
         <DialogHeader>
