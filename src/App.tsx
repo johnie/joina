@@ -1,6 +1,7 @@
 import { MDXContent } from '@content-collections/mdx/react';
 import { allPages } from 'content-collections';
 import { ApplyCard } from '@/components/apply-card';
+import { FaqAccordion } from '@/components/faq-accordion';
 import { GodOmsorgLogo } from '@/components/god-omsorg';
 import { JobMetaCard } from '@/components/job-meta';
 import { ShaStamp } from '@/components/sha';
@@ -25,7 +26,7 @@ function App() {
         <h1 className="scroll-m-20 text-center text-4xl font-extrabold tracking-tight text-balance">
           {indexPage?.title}
         </h1>
-        <MDXContent code={indexPage.mdx} />
+        <MDXContent code={indexPage.mdx} components={{ FaqAccordion }} />
         <ApplyCard />
         <JobMetaCard
           items={[
