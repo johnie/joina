@@ -1,6 +1,19 @@
 import { zValidator } from '@hono/zod-validator';
 import { Hono } from 'hono';
 import { z } from 'zod';
+import {
+  ALLOWED_FILE_TYPES,
+  ERROR_MESSAGES,
+  MAX_FILE_SIZE,
+  SUCCESS_MESSAGES,
+} from '../constants/upload';
+import {
+  type JsonApiError,
+  createErrorResponse,
+  createInternalError,
+  createSuccessResponse,
+  createValidationError,
+} from '../utils/jsonapi';
 import { slugifyEmail } from '../utils/slugify';
 
 // Define the Cloudflare Workers environment type
@@ -19,11 +32,73 @@ const JobApplicationSchema = z.object({
   files: z
     .union([z.instanceof(File), z.array(z.instanceof(File))])
     .transform((val) => (Array.isArray(val) ? val : [val]))
-    .pipe(z.array(z.instanceof(File)).min(1, 'Minst en fil krävs')),
+    .pipe(z.array(z.instanceof(File)).min(1, ERROR_MESSAGES.NO_FILES)),
 });
 
 // Type for the validated data (exported for potential reuse)
 export type JobApplicationData = z.infer<typeof JobApplicationSchema>;
+
+/**
+ * Validates file type against allowed types
+ */
+function validateFileType(file: File): JsonApiError | null {
+  if (!ALLOWED_FILE_TYPES.includes(file.type as typeof ALLOWED_FILE_TYPES[number])) {
+    return createValidationError(ERROR_MESSAGES.INVALID_FILE_TYPE(file.name));
+  }
+  return null;
+}
+
+/**
+ * Validates file size against maximum allowed size
+ */
+function validateFileSize(file: File): JsonApiError | null {
+  if (file.size > MAX_FILE_SIZE) {
+    return createValidationError(ERROR_MESSAGES.FILE_TOO_LARGE(file.name));
+  }
+  return null;
+}
+
+/**
+ * Validates all files in the upload
+ */
+function validateFiles(files: File[]): JsonApiError[] {
+  const errors: JsonApiError[] = [];
+
+  if (!files || files.length === 0) {
+    errors.push(createValidationError(ERROR_MESSAGES.NO_FILES));
+    return errors;
+  }
+
+  for (const file of files) {
+    if (typeof file === 'string' || !file || typeof file !== 'object') {
+      continue;
+    }
+
+    const typeError = validateFileType(file);
+    if (typeError) errors.push(typeError);
+
+    const sizeError = validateFileSize(file);
+    if (sizeError) errors.push(sizeError);
+  }
+
+  return errors;
+}
+
+/**
+ * Uploads a file to R2 bucket
+ */
+async function uploadFileToR2(
+  bucket: R2Bucket,
+  file: File,
+  folderName: string,
+): Promise<void> {
+  const fileKey = `${folderName}/${file.name}`;
+  await bucket.put(fileKey, file.stream(), {
+    httpMetadata: {
+      contentType: file.type,
+    },
+  });
+}
 
 /**
  * Upload endpoint for job applications
@@ -35,54 +110,18 @@ export type JobApplicationData = z.infer<typeof JobApplicationSchema>;
  */
 upload.post('/', zValidator('form', JobApplicationSchema), async (c) => {
   try {
-    // Parse the form data
-    const formData = c.req.valid('form');
+    const { name, email, phone, files } = c.req.valid('form');
 
-    // Extract text fields
-    const name = formData.name;
-    const email = formData.email;
-    const phone = formData.phone;
-    const files = formData.files;
+    // Validate files
+    const validationErrors = validateFiles(files);
+    if (validationErrors.length > 0) {
+      return c.json(createErrorResponse(validationErrors), 400);
+    }
 
+    // Generate unique folder name
     const folderName = `${slugifyEmail(email)}-${Date.now()}`;
 
-    // Validate that files are present
-    if (!files || files.length === 0) {
-      return c.json({ error: 'Minst en fil krävs' }, 400);
-    }
-
-    const allowedTypes = [
-      'application/pdf',
-      'application/msword',
-      'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-    ];
-    const maxSize = 5 * 1024 * 1024; // 5MB
-
-    for (const file of files) {
-      if (typeof file === 'string' || !file || typeof file !== 'object') {
-        continue;
-      }
-
-      if (!allowedTypes.includes(file.type)) {
-        return c.json(
-          {
-            error: `Ogiltig filtyp för ${file.name}. Endast PDF, DOC och DOCX är tillåtna.`,
-          },
-          400,
-        );
-      }
-
-      if (file.size > maxSize) {
-        return c.json(
-          {
-            error: `Filen ${file.name} överskrider maximal storlek på 5MB.`,
-          },
-          400,
-        );
-      }
-    }
-
-    // Prepare the JSON data to store
+    // Prepare application metadata
     const applicationData = {
       name,
       email,
@@ -95,52 +134,63 @@ upload.post('/', zValidator('form', JobApplicationSchema), async (c) => {
       })),
     };
 
-    // Upload the JSON data file
+    // Upload metadata JSON
     const jsonKey = `${folderName}/application.json`;
     await c.env.BUCKET.put(jsonKey, JSON.stringify(applicationData, null, 2));
 
-    // Upload the files
-    for (const fileEntry of files) {
-      if (
-        typeof fileEntry === 'string' ||
-        !fileEntry ||
-        typeof fileEntry !== 'object'
-      ) {
+    // Upload all files
+    for (const file of files) {
+      if (typeof file === 'string' || !file || typeof file !== 'object') {
         continue;
       }
 
-      const file = fileEntry as File;
-      const fileKey = `${folderName}/${file.name}`;
       try {
-        await c.env.BUCKET.put(fileKey, file.stream(), {
-          httpMetadata: {
-            contentType: file.type,
-          },
-        });
+        await uploadFileToR2(c.env.BUCKET, file, folderName);
       } catch (uploadError) {
-        console.error(`Fel vid uppladdning av fil ${file.name}:`, uploadError);
+        console.error(`Failed to upload file ${file.name}:`, uploadError);
         return c.json(
-          {
-            error: `Misslyckades med att ladda upp filen ${file.name}.`,
-          },
+          createErrorResponse(
+            createInternalError(ERROR_MESSAGES.UPLOAD_FAILED(file.name), {
+              fileName: file.name,
+              error: uploadError instanceof Error ? uploadError.message : 'Unknown error',
+            }),
+          ),
           500,
         );
       }
     }
 
-    // Return success response
-    const response = {
-      success: true,
-      message: 'Ansökan har laddats upp',
-    };
-    return c.json(response, 201);
+    // Return JSON API compliant success response
+    return c.json(
+      createSuccessResponse(
+        {
+          type: 'application',
+          id: folderName,
+          attributes: {
+            name,
+            email,
+            phone,
+            submittedAt: applicationData.submittedAt,
+            fileCount: files.length,
+          },
+        },
+        {
+          message: SUCCESS_MESSAGES.APPLICATION_UPLOADED,
+        },
+      ),
+      201,
+    );
   } catch (error) {
     console.error('Upload error:', error);
     return c.json(
-      {
-        error: 'Internt serverfel',
-        message: error instanceof Error ? error.message : 'Okänt fel',
-      },
+      createErrorResponse(
+        createInternalError(
+          ERROR_MESSAGES.INTERNAL_ERROR,
+          {
+            message: error instanceof Error ? error.message : 'Unknown error',
+          },
+        ),
+      ),
       500,
     );
   }
