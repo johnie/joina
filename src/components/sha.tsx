@@ -1,4 +1,4 @@
-import { Github } from 'lucide-react';
+import { GitBranch } from 'lucide-react';
 
 export function ShaStamp() {
   const SHA = import.meta.env.VITE_GIT_SHA;
@@ -13,7 +13,7 @@ export function ShaStamp() {
             rel="noopener noreferrer"
             className="hover:underline inline-flex items-center gap-1"
           >
-            <Github className="w-3 h-3" />
+            <GitBranch className="w-3 h-3" />
             {SHA}
           </a>
         </span>
