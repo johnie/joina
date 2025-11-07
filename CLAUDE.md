@@ -5,11 +5,11 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ## Project Overview
 
 This is a **hybrid full-stack application** combining a React 19 SPA frontend with a Hono API backend, all deployed to Cloudflare Workers. The project uses:
-- **Vite (Rolldown variant)**: Custom Vite fork optimized with Rolldown bundler (`npm:rolldown-vite@7.1.20`)
+- **Vite (Rolldown variant)**: Custom Vite fork optimized with Rolldown bundler (`npm:rolldown-vite@7.2.2`)
 - **Cloudflare Vite Plugin**: Handles building and bundling both client and worker in a single command
 - **React 19 with React Compiler**: Automatic optimization of React components
 - **Hono**: Ultrafast web framework for Cloudflare Workers (API backend)
-- **Content Collections**: Type-safe MDX content management with `.content-collections/generated` imports
+- **Content Collections**: Type-safe MDX and YAML content management with `.content-collections/generated` imports
 - **Tailwind CSS v4**: Using the new Vite plugin architecture
 - **shadcn/ui**: Component library (New York style) with Radix UI primitives
 - **TanStack Form**: Form state management and validation
@@ -42,18 +42,24 @@ pnpm biome:fix
 ## Architecture
 
 ### Content Management System
-The project uses `@content-collections` for type-safe MDX content:
+The project uses `@content-collections` for type-safe content management:
 
-1. **Configuration**: `content-collections.ts` defines collections with Zod schemas
-   - Currently configured with `pages` collection
-   - Content directory: `src/pages/`
-   - Schema includes: `title`, `summary`, `content`
-   - MDX compilation handled automatically via `compileMDX` with rehype plugins:
-     - `rehypeUnwrapImages`: Unwraps images from paragraph tags
-     - `rehypeImageToolkit`: Enhances image processing capabilities
+1. **Configuration**: `content-collections.ts` defines two collections with Zod schemas:
+   - **Pages Collection** (`pages`)
+     - Content directory: `src/content/pages/`
+     - Format: MDX files (`*.mdx`)
+     - Schema: `title`, `summary`, `content`
+     - MDX compilation with rehype plugins:
+       - `rehypeUnwrapImages`: Unwraps images from paragraph tags
+       - `rehypeImageToolkit`: Enhances image processing capabilities
+   - **Q&A Collection** (`qna`)
+     - Content directory: `src/content/qna/`
+     - Format: YAML files (`*.yaml`)
+     - Schema: `title`, `answer`, `order`
 
 2. **Generated Types**: Content Collections generates TypeScript types at `.content-collections/generated`
-   - Import with: `import { allPages } from 'content-collections'`
+   - Import pages: `import { allPages } from 'content-collections'`
+   - Import Q&A: `import { allQna } from 'content-collections'`
    - Path alias configured in tsconfig: `"content-collections": ["./.content-collections/generated"]`
 
 3. **Usage Pattern**: See `src/App.tsx` for reference
@@ -110,7 +116,8 @@ Forms use **TanStack Form** (`@tanstack/react-form`) with:
 
 ## Adding New Content
 
-1. Create MDX file in `src/pages/` directory
+### Adding MDX Pages
+1. Create MDX file in `src/content/pages/` directory
 2. Include frontmatter with required fields:
    ```mdx
    ---
@@ -123,6 +130,16 @@ Forms use **TanStack Form** (`@tanstack/react-form`) with:
    ```
 3. Content Collections will auto-generate types on next dev/build
 4. Access via `allPages` import from `content-collections`
+
+### Adding Q&A Items
+1. Create YAML file in `src/content/qna/` directory
+2. Include required fields:
+   ```yaml
+   title: "Question title"
+   answer: "Answer text"
+   order: 1
+   ```
+3. Access via `allQna` import from `content-collections`
 
 ### MDX Image Syntax
 Images in MDX support custom styling via the title attribute:
@@ -152,9 +169,11 @@ The worker has access to:
 
 ### Request Handling
 1. **API Routes** (`/api/*`): Handled by Hono server
-   - Routes run before static assets (`run_worker_first: ["/api/*"]`)
+   - Routes run before static assets (`run_worker_first: ["/api/*", "/sitemap.xml", "/robots.txt"]`)
    - `GET /api/health`: Health check endpoint
    - `POST /api/upload`: Job application submission with file uploads to R2
+   - `GET /sitemap.xml`: Sitemap generation (handled by worker)
+   - `GET /robots.txt`: Robots.txt generation (handled by worker)
 2. **Static Assets**: All other routes serve the React SPA via SPA routing
 
 ### Build Process
