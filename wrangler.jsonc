@@ -1,8 +1,26 @@
 {
 	"$schema": "./node_modules/wrangler/config-schema.json",
 	"name": "joina",
-	"compatibility_date": "2025-04-03",
+	"main": "./src/server/index.ts",
+	"compatibility_date": "2025-09-15",
+	"compatibility_flags": ["nodejs_compat"],
 	"assets": {
-		"not_found_handling": "single-page-application"
+		"not_found_handling": "single-page-application",
+		"run_worker_first": ["/api/*"]
+	},
+	"r2_buckets": [
+		{
+			"binding": "BUCKET",
+			"bucket_name": "joina",
+			"preview_bucket_name": "joina-bucket-preview"
+		}
+	],
+	"observability": {
+		"logs": {
+			"enabled": true,
+			"head_sampling_rate": 1,
+			"invocation_logs": true,
+			"persist": true
+		}
 	}
 }

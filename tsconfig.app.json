@@ -30,5 +30,6 @@
 			"content-collections": ["./.content-collections/generated"]
 		}
 	},
-	"include": ["src"]
+	"include": ["src"],
+	"exclude": ["src/server"]
 }
