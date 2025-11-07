@@ -1,6 +1,8 @@
 import { Hono } from 'hono';
 import { cors } from 'hono/cors';
 import { logger } from 'hono/logger';
+import { robotsRoutes } from './routes/robots';
+import { sitemapRoutes } from './routes/sitemap';
 import { upload } from './routes/upload';
 
 const app = new Hono();
@@ -23,5 +25,9 @@ app.get('/api/health', (c) => {
 
 // API routes
 app.route('/api/upload', upload);
+
+// SEO routes (sitemap and robots)
+app.route('/', sitemapRoutes);
+app.route('/', robotsRoutes);
 
 export default app;
