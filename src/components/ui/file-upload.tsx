@@ -52,7 +52,7 @@ export function FileUpload({
         onFileReject,
       }}
     >
-      <div className="space-y-4">{children}</div>
+      <div className="space-y-4 min-w-0 w-full">{children}</div>
     </FileUploadContext.Provider>
   );
 }
@@ -305,7 +305,7 @@ export function FileUploadList({
   ...props
 }: FileUploadListProps) {
   return (
-    <div className={cn('space-y-2', className)} {...props}>
+    <div className={cn('space-y-2 min-w-0 w-full', className)} {...props}>
       {children}
     </div>
   );
@@ -350,7 +350,7 @@ export function FileUploadItem({
     <FileUploadItemContext.Provider value={{ file, onDelete: handleDelete }}>
       <div
         className={cn(
-          'flex items-center gap-3 rounded-lg border bg-card p-3',
+          'flex items-center gap-3 rounded-lg border bg-card p-3 min-w-0',
           className,
         )}
         {...props}
@@ -400,9 +400,27 @@ export function FileUploadItemMetadata({
     return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
   };
 
+  const truncateFileName = (name: string, maxLength: number = 30) => {
+    if (name.length <= maxLength) return name;
+
+    const extension = name.split('.').pop() || '';
+    const nameWithoutExt = name.slice(0, name.lastIndexOf('.'));
+
+    // Reserve space for extension + ellipsis + dot
+    const availableLength = maxLength - extension.length - 4;
+
+    if (availableLength <= 0) {
+      return `${name.slice(0, maxLength - 3)}...`;
+    }
+
+    return `${nameWithoutExt.slice(0, availableLength)}...${extension}`;
+  };
+
   return (
     <div className={cn('min-w-0 flex-1', className)} {...props}>
-      <p className="truncate text-sm font-medium">{file.name}</p>
+      <p className="text-sm font-medium wrap-break-word" title={file.name}>
+        {truncateFileName(file.name)}
+      </p>
       <p className="text-xs text-muted-foreground">
         {formatFileSize(file.size)}
       </p>
