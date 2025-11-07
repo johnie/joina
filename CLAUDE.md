@@ -15,27 +15,28 @@ This is a **hybrid full-stack application** combining a React 19 SPA frontend wi
 - **TanStack Form**: Form state management and validation
 - **Biome**: For linting and formatting (replacing ESLint/Prettier)
 - **Cloudflare Workers**: Deployment target via Wrangler
+- **pnpm**: Package manager (use pnpm, not npm or yarn)
 
 ## Development Commands
 
 ```bash
 # Start React dev server with HMR
-npm run dev
+pnpm dev
 
 # Start Cloudflare Worker dev server (includes React app + API)
-npm run dev:server
+pnpm dev:server
 
 # Type-check and build for production (builds both client and server)
-npm run build
+pnpm build
 
 # Preview production build locally (automatically runs build first)
-npm run preview
+pnpm preview
 
 # Deploy to Cloudflare Workers (automatically runs build first)
-npm run deploy
+pnpm deploy
 
 # Run Biome formatter and linter (auto-fix with --unsafe flag)
-npm run biome:fix
+pnpm biome:fix
 ```
 
 ## Architecture
@@ -77,7 +78,7 @@ The project uses composite TypeScript configs:
 - **JavaScript/TypeScript**: 2 spaces, single quotes, 80 char line width
 - **JSON**: 4 space indentation (tabs for other files)
 - **Import organization**: Automatic with Biome assist
-- Run `npm run biome:fix` before committing
+- Run `pnpm biome:fix` before committing
 
 ### React Compiler Notes
 - Enabled via `babel-plugin-react-compiler`
@@ -141,15 +142,23 @@ The project uses a **hybrid architecture** with both a static React SPA and a Ho
 - **Framework**: Hono (lightweight web framework)
 - **Entry Point**: `src/server/index.ts`
 - **Routes**: `src/server/routes/`
+- **Middleware**: CORS and logging configured for `/api/*` routes only
+
+### Cloudflare Bindings
+The worker has access to:
+- **R2 Bucket**: `c.env.BUCKET` (configured in `wrangler.jsonc`)
+  - Production bucket: `joina`
+  - Preview bucket: `joina-bucket-preview`
 
 ### Request Handling
 1. **API Routes** (`/api/*`): Handled by Hono server
+   - Routes run before static assets (`run_worker_first: ["/api/*"]`)
    - `GET /api/health`: Health check endpoint
-   - `POST /api/application/upload`: Job application submission
-2. **Static Assets**: All other routes serve the React SPA via the ASSETS binding
+   - `POST /api/upload`: Job application submission with file uploads to R2
+2. **Static Assets**: All other routes serve the React SPA via SPA routing
 
 ### Build Process
-The build command (`npm run build`) uses the **Cloudflare Vite plugin** to automatically build both client and server:
+The build command (`pnpm build`) uses the **Cloudflare Vite plugin** to automatically build both client and server:
 - A single `vite build` command produces two outputs:
   - **Client Build**: React SPA → `dist/client/`
   - **Worker Build**: Hono worker → `dist/joina/`
@@ -159,20 +168,32 @@ The build command (`npm run build`) uses the **Cloudflare Vite plugin** to autom
 ### Deployment Configuration
 - **Wrangler Config**: `wrangler.jsonc`
   - `main`: Points to source file `./src/server/index.ts`
-  - `assets.binding`: "ASSETS" (accessible in worker as `c.env.ASSETS`)
+  - `compatibility_flags`: `["nodejs_compat"]` enabled
   - `assets.not_found_handling`: "single-page-application" (SPA routing)
+  - `assets.run_worker_first`: API routes run before static assets
+  - **Observability**: Full logging enabled with head sampling
 - The Cloudflare Vite plugin automatically generates an output `wrangler.json` in `dist/joina/`
 
 ### Adding New API Endpoints
 1. Create a new route file in `src/server/routes/`
-2. Define your endpoints using Hono's router
+2. Define your endpoints using Hono's router with typed bindings:
+   ```typescript
+   type Bindings = {
+     BUCKET: R2Bucket;
+   };
+   const myRoute = new Hono<{ Bindings: Bindings }>();
+   ```
 3. Import and mount the route in `src/server/index.ts` using `app.route()`
 4. Example:
    ```typescript
    // src/server/routes/example.ts
    import { Hono } from 'hono';
 
-   export const exampleRoutes = new Hono();
+   type Bindings = {
+     BUCKET: R2Bucket;
+   };
+
+   export const exampleRoutes = new Hono<{ Bindings: Bindings }>();
 
    exampleRoutes.get('/', (c) => {
      return c.json({ message: 'Hello from API' });
@@ -183,6 +204,15 @@ The build command (`npm run build`) uses the **Cloudflare Vite plugin** to autom
    app.route('/api/example', exampleRoutes);
    ```
 
+### File Upload Handling
+The `/api/upload` endpoint demonstrates best practices:
+- **Validation**: Uses `@hono/zod-validator` for form validation
+- **File validation**: Type and size checks before upload
+- **R2 Storage**: Files organized in timestamped folders with metadata JSON
+- **JSON:API format**: Error and success responses follow JSON:API specification
+- **Constants**: Upload limits and messages centralized in `src/server/constants/upload`
+- **Utils**: Reusable JSON:API response helpers in `src/server/utils/jsonapi`
+
 ## Deployment
 
 The project deploys to Cloudflare Workers with static assets:
@@ -192,3 +222,4 @@ The project deploys to Cloudflare Workers with static assets:
 - Wrangler automatically uses the output `wrangler.json` for deployment
 - API routes (`/api/*`) are handled by the Cloudflare Worker
 - All other routes serve the React SPA with SPA routing enabled
+- Full observability with Cloudflare logs enabled
