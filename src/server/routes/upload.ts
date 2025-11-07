@@ -2,59 +2,10 @@ import { zValidator } from '@hono/zod-validator';
 import { Hono } from 'hono';
 import { z } from 'zod';
 import { slugifyEmail } from '../utils/slugify';
-import { EmailMessage } from 'cloudflare:email';
-
-/**
- * Creates a raw MIME message for multipart/alternative email
- * (plain text + HTML) without Node.js dependencies
- */
-function createRawMimeMessage(params: {
-  from: { name: string; email: string };
-  to: string;
-  subject: string;
-  replyTo?: string;
-  textContent: string;
-  htmlContent: string;
-}): string {
-  const boundary = `----=_Part_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-
-  const headers = [
-    `From: ${params.from.name} <${params.from.email}>`,
-    `To: ${params.to}`,
-    `Subject: ${params.subject}`,
-    params.replyTo ? `Reply-To: ${params.replyTo}` : null,
-    'MIME-Version: 1.0',
-    `Content-Type: multipart/alternative; boundary="${boundary}"`,
-    '',
-  ]
-    .filter((h) => h !== null)
-    .join('\r\n');
-
-  const textPart = [
-    `--${boundary}`,
-    'Content-Type: text/plain; charset=utf-8',
-    'Content-Transfer-Encoding: 8bit',
-    '',
-    params.textContent,
-    '',
-  ].join('\r\n');
-
-  const htmlPart = [
-    `--${boundary}`,
-    'Content-Type: text/html; charset=utf-8',
-    'Content-Transfer-Encoding: 8bit',
-    '',
-    params.htmlContent,
-    '',
-  ].join('\r\n');
-
-  return `${headers}${textPart}${htmlPart}--${boundary}--\r\n`;
-}
 
 // Define the Cloudflare Workers environment type
 type Bindings = {
   BUCKET: R2Bucket;
-  EMAIL: SendEmail;
 };
 
 // Create a new Hono app with typed bindings
@@ -175,88 +126,6 @@ upload.post('/', zValidator('form', JobApplicationSchema), async (c) => {
           500,
         );
       }
-    }
-
-    // Send application email notification
-    const htmlContent = `
-        <!DOCTYPE html>
-        <html>
-        <head>
-          <meta charset="utf-8">
-          <style>
-            body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; line-height: 1.6; color: #333; }
-            .container { max-width: 600px; margin: 0 auto; padding: 20px; }
-            .header { background: #f4f4f5; padding: 20px; border-radius: 8px; margin-bottom: 20px; }
-            .info-list { list-style: none; padding: 0; }
-            .info-list li { padding: 8px 0; border-bottom: 1px solid #e4e4e7; }
-            .info-list strong { color: #18181b; min-width: 100px; display: inline-block; }
-            .files { background: #fafafa; padding: 15px; border-radius: 8px; margin-top: 20px; }
-            .footer { margin-top: 30px; padding-top: 20px; border-top: 2px solid #e4e4e7; font-size: 0.875rem; color: #71717a; }
-          </style>
-        </head>
-        <body>
-          <div class="container">
-            <div class="header">
-              <h2 style="margin: 0; color: #18181b;">🎉 Ny jobbansökan mottagen</h2>
-            </div>
-            <ul class="info-list">
-              <li><strong>Namn:</strong> ${name}</li>
-              <li><strong>E-post:</strong> <a href="mailto:${email}">${email}</a></li>
-              <li><strong>Telefon:</strong> ${phone}</li>
-              <li><strong>Inlämnad:</strong> ${new Date().toLocaleString('sv-SE', { dateStyle: 'long', timeStyle: 'short' })}</li>
-            </ul>
-            <div class="files">
-              <strong>📎 Bifogade filer:</strong>
-              <ul>
-                ${files.map((file) => `<li>${file.name} (${(file.size / 1024).toFixed(1)} KB)</li>`).join('')}
-              </ul>
-            </div>
-            <div class="footer">
-              <p>Svara på detta mail för att kontakta sökanden direkt.</p>
-              <p><small>Filerna är sparade i R2 under: <code>${folderName}</code></small></p>
-            </div>
-          </div>
-        </body>
-        </html>
-      `;
-
-    const textContent = `Ny jobbansökan från ${name}
-
-Sökandeinformation:
-- Namn: ${name}
-- E-post: ${email}
-- Telefon: ${phone}
-- Inlämnad: ${new Date().toLocaleString('sv-SE')}
-
-Bifogade filer:
-${files.map((file) => `- ${file.name} (${(file.size / 1024).toFixed(1)} KB)`).join('\n')}
-
-Svara på detta mail för att kontakta sökanden direkt.
-Filerna är sparade i R2 under: ${folderName}
-      `;
-
-    const rawMimeMessage = createRawMimeMessage({
-      from: { name, email: 'jobb@johnie.se' },
-      to: 'jobb@johnie.se',
-      subject: `Ny jobbansökan från ${name}`,
-      replyTo: email,
-      textContent,
-      htmlContent,
-    });
-
-    const message = new EmailMessage(email, 'jobb@johnie.se', rawMimeMessage);
-
-    try {
-      await c.env.EMAIL.send(message);
-      console.log(`Email notification sent for application from ${email}`);
-    } catch (emailError) {
-      console.error(
-        'Fel vid skickande av e-post:',
-        emailError,
-        rawMimeMessage,
-        message,
-      );
-      // Don't fail the request if email fails, just log it
     }
 
     // Return success response
