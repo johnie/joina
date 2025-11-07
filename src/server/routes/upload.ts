@@ -8,11 +8,11 @@ import {
   SUCCESS_MESSAGES,
 } from '../constants/upload';
 import {
-  type JsonApiError,
   createErrorResponse,
   createInternalError,
   createSuccessResponse,
   createValidationError,
+  type JsonApiError,
 } from '../utils/jsonapi';
 import { slugifyEmail } from '../utils/slugify';
 
@@ -42,7 +42,11 @@ export type JobApplicationData = z.infer<typeof JobApplicationSchema>;
  * Validates file type against allowed types
  */
 function validateFileType(file: File): JsonApiError | null {
-  if (!ALLOWED_FILE_TYPES.includes(file.type as typeof ALLOWED_FILE_TYPES[number])) {
+  if (
+    !ALLOWED_FILE_TYPES.includes(
+      file.type as (typeof ALLOWED_FILE_TYPES)[number],
+    )
+  ) {
     return createValidationError(ERROR_MESSAGES.INVALID_FILE_TYPE(file.name));
   }
   return null;
@@ -152,7 +156,10 @@ upload.post('/', zValidator('form', JobApplicationSchema), async (c) => {
           createErrorResponse(
             createInternalError(ERROR_MESSAGES.UPLOAD_FAILED(file.name), {
               fileName: file.name,
-              error: uploadError instanceof Error ? uploadError.message : 'Unknown error',
+              error:
+                uploadError instanceof Error
+                  ? uploadError.message
+                  : 'Unknown error',
             }),
           ),
           500,
@@ -184,12 +191,9 @@ upload.post('/', zValidator('form', JobApplicationSchema), async (c) => {
     console.error('Upload error:', error);
     return c.json(
       createErrorResponse(
-        createInternalError(
-          ERROR_MESSAGES.INTERNAL_ERROR,
-          {
-            message: error instanceof Error ? error.message : 'Unknown error',
-          },
-        ),
+        createInternalError(ERROR_MESSAGES.INTERNAL_ERROR, {
+          message: error instanceof Error ? error.message : 'Unknown error',
+        }),
       ),
       500,
     );
