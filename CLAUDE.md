@@ -159,13 +159,34 @@ The project uses a **hybrid architecture** with both a static React SPA and a Ho
 - **Framework**: Hono (lightweight web framework)
 - **Entry Point**: `src/server/index.ts`
 - **Routes**: `src/server/routes/`
-- **Middleware**: CORS and logging configured for `/api/*` routes only
+- **Middleware**: Environment-aware CORS and logging for `/api/*` routes
+- **Types**: `src/server/types/bindings.ts` - Shared Cloudflare Workers environment bindings
 
 ### Cloudflare Bindings
-The worker has access to:
+The worker has access to the following environment bindings (defined in `src/server/types/bindings.ts`):
 - **R2 Bucket**: `c.env.BUCKET` (configured in `wrangler.jsonc`)
   - Production bucket: `joina`
   - Preview bucket: `joina-bucket-preview`
+- **PRODUCTION_URL**: `c.env.PRODUCTION_URL` - Production domain for CORS validation
+- **ENVIRONMENT**: `c.env.ENVIRONMENT` - Optional environment indicator
+
+### CORS Security
+The API implements **environment-aware CORS protection** (configured inline in `src/server/index.ts`):
+
+**Local Development**:
+- Allows requests from **any origin** (`*`)
+- Auto-detected via `process.env.NODE_ENV === 'development'` or `process.env.WRANGLER_DEV === 'true'`
+
+**Production**:
+- Only allows requests from the production domain
+- Configured via `PRODUCTION_URL` in `wrangler.jsonc` (defaults to `https://joina.pages.dev`)
+
+Update the production URL in `wrangler.jsonc`:
+```jsonc
+"vars": {
+  "PRODUCTION_URL": "https://your-domain.com"
+}
+```
 
 ### Request Handling
 1. **API Routes** (`/api/*`): Handled by Hono server
@@ -195,11 +216,11 @@ The build command (`pnpm build`) uses the **Cloudflare Vite plugin** to automati
 
 ### Adding New API Endpoints
 1. Create a new route file in `src/server/routes/`
-2. Define your endpoints using Hono's router with typed bindings:
+2. Import the shared `Bindings` type from `src/server/types/bindings.ts`
+3. Define your endpoints using Hono's router with typed bindings:
    ```typescript
-   type Bindings = {
-     BUCKET: R2Bucket;
-   };
+   import type { Bindings } from '../types/bindings';
+
    const myRoute = new Hono<{ Bindings: Bindings }>();
    ```
 3. Import and mount the route in `src/server/index.ts` using `app.route()`
