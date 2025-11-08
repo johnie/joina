@@ -1,22 +1,21 @@
 import { allPages } from 'content-collections';
 import { Hono } from 'hono';
+import { SEO, SITE_URL } from '@/config';
 
 export const sitemapRoutes = new Hono();
 
 sitemapRoutes.get('/sitemap.xml', (c) => {
-  const baseUrl = 'https://joina.johnie.se';
   const currentDate = new Date().toISOString().split('T')[0];
 
-  // Generate sitemap entries from content collections
   const pages = allPages.map((page) => {
     const slug = page._meta.fileName.replace('.mdx', '');
-    const url = slug === 'index' ? baseUrl : `${baseUrl}/${slug}`;
+    const url = slug === 'index' ? SITE_URL : `${SITE_URL}/${slug}`;
 
     return `  <url>
     <loc>${url}</loc>
     <lastmod>${currentDate}</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>${slug === 'index' ? '1.0' : '0.8'}</priority>
+    <changefreq>${SEO.DEFAULT_CHANGE_FREQ}</changefreq>
+    <priority>${slug === 'index' ? SEO.HOMEPAGE_PRIORITY : SEO.DEFAULT_PRIORITY}</priority>
   </url>`;
   });
 
