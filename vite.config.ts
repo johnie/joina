@@ -4,7 +4,9 @@ import contentCollections from '@content-collections/vite';
 import tailwindcss from '@tailwindcss/vite';
 import react from '@vitejs/plugin-react';
 import { defineConfig } from 'vite';
+import { jsonLdData } from './json-ld.config';
 import gitShaPlugin from './vite.git-sha';
+import jsonLdPlugin from './vite.json-ld';
 
 // https://vite.dev/config/
 export default defineConfig({
@@ -18,6 +20,7 @@ export default defineConfig({
     contentCollections(),
     tailwindcss(),
     gitShaPlugin(),
+    jsonLdPlugin({ data: jsonLdData }),
   ],
   resolve: {
     alias: {

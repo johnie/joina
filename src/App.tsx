@@ -7,6 +7,24 @@ import { JobMetaCard } from '@/components/job-meta';
 import { MDXImage } from '@/components/mdx/image';
 import { ShaStamp } from '@/components/sha';
 
+const JOB_METADATA = [
+  { label: 'Typ av tjänst', value: '75-100%' },
+  { label: 'Platser', value: 'Sigtuna/Stockholm' },
+  { label: 'Sist ansökningsdag', value: '2026-01-31' },
+];
+
+const COMPANY_INFO = {
+  name: 'God Omsorg',
+  url: 'https://godomsorg.se',
+  description:
+    'God Omsorg - en del av God Assistans, bedriver avlösarservice, ledsagarservice och personlig Assistans.',
+};
+
+const MDX_COMPONENTS = {
+  FaqAccordion,
+  img: MDXImage,
+};
+
 function App() {
   const indexPage = allPages.find(
     (page) => page._meta.fileName === 'index.mdx',
@@ -25,30 +43,22 @@ function App() {
           <span>Sigtuna/Stockholm</span>
         </p>
         <h1 className="scroll-m-20 text-center text-4xl font-extrabold tracking-tight text-balance">
-          {indexPage?.title}
+          {indexPage.title}
         </h1>
-        <MDXContent
-          code={indexPage.mdx}
-          components={{ FaqAccordion, img: MDXImage }}
-        />
+        <MDXContent code={indexPage.mdx} components={MDX_COMPONENTS} />
         <ApplyCard />
-        <JobMetaCard
-          items={[
-            { label: 'Typ av tjänst', value: '75-100%' },
-            { label: 'Platser', value: 'Sigtuna/Stockholm' },
-            {
-              label: 'Sist ansökningsdag',
-              value: '2026-01-31',
-            },
-          ]}
-        />
+        <JobMetaCard items={JOB_METADATA} />
       </article>
-      <a href="https://godomsorg.se" target="_blank" rel="noopener noreferrer">
+      <a
+        href={COMPANY_INFO.url}
+        target="_blank"
+        rel="noopener noreferrer"
+        aria-label={COMPANY_INFO.name}
+      >
         <GodOmsorgLogo className="mx-auto mt-8" />
       </a>
       <p className="text-center text-sm text-muted-foreground mt-2">
-        God Omsorg - en del av God Assistans, bedriver avlösarservice,
-        ledsagarservice och personlig Assistans.
+        {COMPANY_INFO.description}
       </p>
       <ShaStamp />
     </main>

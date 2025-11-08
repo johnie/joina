@@ -5,11 +5,11 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ## Project Overview
 
 This is a **hybrid full-stack application** combining a React 19 SPA frontend with a Hono API backend, all deployed to Cloudflare Workers. The project uses:
-- **Vite (Rolldown variant)**: Custom Vite fork optimized with Rolldown bundler (`npm:rolldown-vite@7.1.20`)
+- **Vite (Rolldown variant)**: Custom Vite fork optimized with Rolldown bundler (`npm:rolldown-vite@7.2.2`)
 - **Cloudflare Vite Plugin**: Handles building and bundling both client and worker in a single command
 - **React 19 with React Compiler**: Automatic optimization of React components
 - **Hono**: Ultrafast web framework for Cloudflare Workers (API backend)
-- **Content Collections**: Type-safe MDX content management with `.content-collections/generated` imports
+- **Content Collections**: Type-safe MDX and YAML content management with `.content-collections/generated` imports
 - **Tailwind CSS v4**: Using the new Vite plugin architecture
 - **shadcn/ui**: Component library (New York style) with Radix UI primitives
 - **TanStack Form**: Form state management and validation
@@ -42,18 +42,24 @@ pnpm biome:fix
 ## Architecture
 
 ### Content Management System
-The project uses `@content-collections` for type-safe MDX content:
+The project uses `@content-collections` for type-safe content management:
 
-1. **Configuration**: `content-collections.ts` defines collections with Zod schemas
-   - Currently configured with `pages` collection
-   - Content directory: `src/pages/`
-   - Schema includes: `title`, `summary`, `content`
-   - MDX compilation handled automatically via `compileMDX` with rehype plugins:
-     - `rehypeUnwrapImages`: Unwraps images from paragraph tags
-     - `rehypeImageToolkit`: Enhances image processing capabilities
+1. **Configuration**: `content-collections.ts` defines two collections with Zod schemas:
+   - **Pages Collection** (`pages`)
+     - Content directory: `src/content/pages/`
+     - Format: MDX files (`*.mdx`)
+     - Schema: `title`, `summary`, `content`
+     - MDX compilation with rehype plugins:
+       - `rehypeUnwrapImages`: Unwraps images from paragraph tags
+       - `rehypeImageToolkit`: Enhances image processing capabilities
+   - **Q&A Collection** (`qna`)
+     - Content directory: `src/content/qna/`
+     - Format: YAML files (`*.yaml`)
+     - Schema: `title`, `answer`, `order`
 
 2. **Generated Types**: Content Collections generates TypeScript types at `.content-collections/generated`
-   - Import with: `import { allPages } from 'content-collections'`
+   - Import pages: `import { allPages } from 'content-collections'`
+   - Import Q&A: `import { allQna } from 'content-collections'`
    - Path alias configured in tsconfig: `"content-collections": ["./.content-collections/generated"]`
 
 3. **Usage Pattern**: See `src/App.tsx` for reference
@@ -110,7 +116,8 @@ Forms use **TanStack Form** (`@tanstack/react-form`) with:
 
 ## Adding New Content
 
-1. Create MDX file in `src/pages/` directory
+### Adding MDX Pages
+1. Create MDX file in `src/content/pages/` directory
 2. Include frontmatter with required fields:
    ```mdx
    ---
@@ -123,6 +130,16 @@ Forms use **TanStack Form** (`@tanstack/react-form`) with:
    ```
 3. Content Collections will auto-generate types on next dev/build
 4. Access via `allPages` import from `content-collections`
+
+### Adding Q&A Items
+1. Create YAML file in `src/content/qna/` directory
+2. Include required fields:
+   ```yaml
+   title: "Question title"
+   answer: "Answer text"
+   order: 1
+   ```
+3. Access via `allQna` import from `content-collections`
 
 ### MDX Image Syntax
 Images in MDX support custom styling via the title attribute:
@@ -142,19 +159,42 @@ The project uses a **hybrid architecture** with both a static React SPA and a Ho
 - **Framework**: Hono (lightweight web framework)
 - **Entry Point**: `src/server/index.ts`
 - **Routes**: `src/server/routes/`
-- **Middleware**: CORS and logging configured for `/api/*` routes only
+- **Middleware**: Environment-aware CORS and logging for `/api/*` routes
+- **Types**: `src/server/types/bindings.ts` - Shared Cloudflare Workers environment bindings
 
 ### Cloudflare Bindings
-The worker has access to:
+The worker has access to the following environment bindings (defined in `src/server/types/bindings.ts`):
 - **R2 Bucket**: `c.env.BUCKET` (configured in `wrangler.jsonc`)
   - Production bucket: `joina`
   - Preview bucket: `joina-bucket-preview`
+- **PRODUCTION_URL**: `c.env.PRODUCTION_URL` - Production domain for CORS validation
+- **ENVIRONMENT**: `c.env.ENVIRONMENT` - Optional environment indicator
+
+### CORS Security
+The API implements **environment-aware CORS protection** (configured inline in `src/server/index.ts`):
+
+**Local Development**:
+- Allows requests from **any origin** (`*`)
+- Auto-detected via `process.env.NODE_ENV === 'development'` or `process.env.WRANGLER_DEV === 'true'`
+
+**Production**:
+- Only allows requests from the production domain
+- Configured via `PRODUCTION_URL` in `wrangler.jsonc` (defaults to `https://joina.pages.dev`)
+
+Update the production URL in `wrangler.jsonc`:
+```jsonc
+"vars": {
+  "PRODUCTION_URL": "https://your-domain.com"
+}
+```
 
 ### Request Handling
 1. **API Routes** (`/api/*`): Handled by Hono server
-   - Routes run before static assets (`run_worker_first: ["/api/*"]`)
+   - Routes run before static assets (`run_worker_first: ["/api/*", "/sitemap.xml", "/robots.txt"]`)
    - `GET /api/health`: Health check endpoint
    - `POST /api/upload`: Job application submission with file uploads to R2
+   - `GET /sitemap.xml`: Sitemap generation (handled by worker)
+   - `GET /robots.txt`: Robots.txt generation (handled by worker)
 2. **Static Assets**: All other routes serve the React SPA via SPA routing
 
 ### Build Process
@@ -176,11 +216,11 @@ The build command (`pnpm build`) uses the **Cloudflare Vite plugin** to automati
 
 ### Adding New API Endpoints
 1. Create a new route file in `src/server/routes/`
-2. Define your endpoints using Hono's router with typed bindings:
+2. Import the shared `Bindings` type from `src/server/types/bindings.ts`
+3. Define your endpoints using Hono's router with typed bindings:
    ```typescript
-   type Bindings = {
-     BUCKET: R2Bucket;
-   };
+   import type { Bindings } from '../types/bindings';
+
    const myRoute = new Hono<{ Bindings: Bindings }>();
    ```
 3. Import and mount the route in `src/server/index.ts` using `app.route()`
