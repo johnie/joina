@@ -1,32 +1,38 @@
 import { Hono } from 'hono';
 import { cors } from 'hono/cors';
 import { logger } from 'hono/logger';
+import {
+  ALLOWED_HEADERS,
+  ALLOWED_HTTP_METHODS,
+  API_ENDPOINTS,
+  isDevelopment,
+} from '@/config';
 import { robotsRoutes } from './routes/robots';
 import { sitemapRoutes } from './routes/sitemap';
 import { upload } from './routes/upload';
+import type { Bindings } from './types/bindings';
 
-const app = new Hono();
+const app = new Hono<{ Bindings: Bindings }>();
 
-// Middleware for API routes only
 app.use('/api/*', logger());
-app.use(
-  '/api/*',
-  cors({
-    origin: '*', // Update this with your actual frontend URL in production
-    allowMethods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-    allowHeaders: ['Content-Type', 'Authorization'],
-  }),
-);
+app.use('/api/*', (c, next) => {
+  const origin = isDevelopment
+    ? '*'
+    : c.env.PRODUCTION_URL || 'https://joina.johnie.se';
 
-// Health check endpoint
-app.get('/api/health', (c) => {
+  return cors({
+    origin,
+    allowMethods: ALLOWED_HTTP_METHODS,
+    allowHeaders: ALLOWED_HEADERS,
+  })(c, next);
+});
+
+app.get(API_ENDPOINTS.HEALTH, (c) => {
   return c.json({ status: 'ok', timestamp: new Date().toISOString() });
 });
 
-// API routes
-app.route('/api/upload', upload);
+app.route(API_ENDPOINTS.UPLOAD, upload);
 
-// SEO routes (sitemap and robots)
 app.route('/', sitemapRoutes);
 app.route('/', robotsRoutes);
 
