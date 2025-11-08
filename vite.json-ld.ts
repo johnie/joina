@@ -41,7 +41,6 @@ export default function jsonLdPlugin(options: JsonLdPluginOptions): Plugin {
     minify = process.env.NODE_ENV === 'production',
   } = options;
 
-  // Normalize data to array
   const schemas = Array.isArray(data) ? data : [data];
 
   return {
@@ -49,29 +48,34 @@ export default function jsonLdPlugin(options: JsonLdPluginOptions): Plugin {
     transformIndexHtml: {
       order: 'pre',
       handler(html) {
-        // Generate script tags for each schema
         const scriptTags = schemas
           .map((schema) => {
             const json = minify
               ? JSON.stringify(schema)
               : JSON.stringify(schema, null, 2);
 
-            return `    <script type="application/ld+json">\n    ${minify ? json : json.split('\n').join('\n    ')}\n    </script>`;
+            if (minify) {
+              return `<script type="application/ld+json">\n${json}\n</script>`;
+            } else {
+              const indentedJson = json
+                .split('\n')
+                .map((line) => (line ? `  ${line}` : line))
+                .join('\n');
+              return `<script type="application/ld+json">\n${indentedJson}\n</script>`;
+            }
           })
           .join('\n');
 
-        // Inject based on the injectTo option
         switch (injectTo) {
           case 'head':
             return html.replace('</head>', `${scriptTags}\n  </head>`);
-          case 'head-prepend':
-            return html.replace(
-              '<head>',
-              `<head>\n${scriptTags
-                .split('\n')
-                .map((line) => (line ? `  ${line}` : line))
-                .join('\n')}`,
-            );
+          case 'head-prepend': {
+            const indentedScriptTags = scriptTags
+              .split('\n')
+              .map((line) => (line ? `    ${line}` : line))
+              .join('\n');
+            return html.replace('<head>', `<head>\n${indentedScriptTags}`);
+          }
           case 'body':
             return html.replace('</body>', `${scriptTags}\n  </body>`);
           case 'body-prepend':
