@@ -14,17 +14,6 @@ import { APPLICATION_DEADLINE } from '@/constants/application';
 export function ApplyCard() {
   return (
     <>
-      <div className="not-prose flex items-center gap-3 rounded-lg bg-amber-50 dark:bg-amber-950/30 p-4 border border-amber-200 dark:border-amber-900">
-        <Calendar className="h-5 w-5 text-amber-600 dark:text-amber-400 flex-shrink-0" />
-        <div>
-          <p className="text-sm font-medium text-stone-900 dark:text-stone-100">
-            Sista ansökningsdag
-          </p>
-          <p className="text-lg font-semibold text-amber-600 dark:text-amber-400">
-            {APPLICATION_DEADLINE}
-          </p>
-        </div>
-      </div>
       <Card className="not-prose my-8">
         <CardHeader>
           <CardTitle className="text-xl text-amber-600 font-heading">
@@ -85,6 +74,17 @@ export function ApplyCard() {
           </Button>
         </CardFooter>
       </Card>
+      <div className="not-prose flex items-center gap-3 rounded-lg bg-amber-950/30 p-4 border border-amber-900 mb-8">
+        <Calendar className="h-5 w-5 text-amber-400" />
+        <div>
+          <p className="text-sm font-medium text-stone-900 dark:text-stone-100">
+            Sista ansökningsdag
+          </p>
+          <p className="text-lg font-semibold text-amber-400">
+            {APPLICATION_DEADLINE}
+          </p>
+        </div>
+      </div>
     </>
   );
 }
