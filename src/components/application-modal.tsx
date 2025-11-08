@@ -25,45 +25,59 @@ import {
 } from '@/components/ui/file-upload';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import {
+  API_ENDPOINTS,
+  FILE_UPLOAD,
+  FORM_VALIDATION,
+  SUCCESS_MESSAGES,
+  VALIDATION_MESSAGES,
+} from '@/config';
 
-// Mock API function for form submission
 async function submitApplication(data: {
   name: string;
   email: string;
   phone: string;
   files: File[];
 }) {
-  // Post the application data to the server
   const formData = new FormData();
   formData.append('name', data.name);
   formData.append('email', data.email);
   formData.append('phone', data.phone);
 
-  // Append all files
   for (const file of data.files) {
     formData.append('files', file);
   }
 
-  const response = await fetch('/api/upload', {
+  const response = await fetch(API_ENDPOINTS.UPLOAD, {
     method: 'POST',
     body: formData,
   });
 
   if (!response.ok) {
-    throw new Error('Det gick inte att skicka ansökan');
+    throw new Error(VALIDATION_MESSAGES.SUBMISSION_FAILED);
   }
 
   return { success: true };
 }
 
-// Validation schema
 const applicationSchema = z.object({
-  name: z.string().min(2, 'Namnet måste vara minst 2 tecken'),
-  email: z.email('Ogiltig e-postadress'),
+  name: z
+    .string()
+    .min(
+      FORM_VALIDATION.NAME.MIN_LENGTH,
+      VALIDATION_MESSAGES.NAME_TOO_SHORT(FORM_VALIDATION.NAME.MIN_LENGTH),
+    ),
+  email: z.email(VALIDATION_MESSAGES.INVALID_EMAIL),
   phone: z
     .string()
-    .min(10, 'Telefonnummer måste vara minst 10 tecken')
-    .regex(/^[0-9+\s-()]+$/, 'Ogiltigt telefonnummerformat'),
+    .min(
+      FORM_VALIDATION.PHONE.MIN_LENGTH,
+      VALIDATION_MESSAGES.PHONE_TOO_SHORT(FORM_VALIDATION.PHONE.MIN_LENGTH),
+    )
+    .regex(
+      FORM_VALIDATION.PHONE.PATTERN,
+      VALIDATION_MESSAGES.INVALID_PHONE_FORMAT,
+    ),
 });
 
 function FieldError({ errors }: { errors: (string | undefined)[] }) {
@@ -90,23 +104,20 @@ export function ApplicationModal() {
     },
     onSubmit: async ({ value }) => {
       try {
-        // Validate required fields
         if (value.files.length === 0) {
-          toast.error(
-            'Vänligen ladda upp minst en fil (CV eller personligt brev)',
-          );
+          toast.error(VALIDATION_MESSAGES.UPLOAD_REQUIRED);
           return;
         }
 
         const result = await submitApplication(value);
 
         if (result.success) {
-          toast.success('Ansökan skickad!');
+          toast.success(SUCCESS_MESSAGES.APPLICATION_SUBMITTED);
           form.reset();
           setOpen(false);
         }
       } catch (error) {
-        toast.error('Kunde inte skicka ansökan. Försök igen.');
+        toast.error(VALIDATION_MESSAGES.SUBMISSION_ERROR);
         console.error('Submission error:', error);
       }
     },
@@ -136,7 +147,6 @@ export function ApplicationModal() {
           }}
           className="space-y-6 "
         >
-          {/* Name Field */}
           <form.Field
             name="name"
             validators={{
@@ -167,7 +177,6 @@ export function ApplicationModal() {
             )}
           </form.Field>
 
-          {/* Email Field */}
           <form.Field
             name="email"
             validators={{
@@ -199,7 +208,6 @@ export function ApplicationModal() {
             )}
           </form.Field>
 
-          {/* Phone Field */}
           <form.Field
             name="phone"
             validators={{
@@ -231,16 +239,17 @@ export function ApplicationModal() {
             )}
           </form.Field>
 
-          {/* File Upload */}
           <form.Field
             name="files"
             validators={{
               onChange: ({ value }) => {
                 if (value.length === 0) {
-                  return 'Vänligen ladda upp minst en fil';
+                  return VALIDATION_MESSAGES.NO_FILES;
                 }
-                if (value.length > 5) {
-                  return 'Du kan ladda upp max 5 filer';
+                if (value.length > FILE_UPLOAD.MAX_FILES) {
+                  return VALIDATION_MESSAGES.TOO_MANY_FILES(
+                    FILE_UPLOAD.MAX_FILES,
+                  );
                 }
                 return undefined;
               },
@@ -254,9 +263,9 @@ export function ApplicationModal() {
                 <FileUpload
                   value={field.state.value}
                   onValueChange={field.handleChange}
-                  accept=".pdf,.doc,.docx,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
-                  maxFiles={5}
-                  maxSize={5 * 1024 * 1024}
+                  accept={`${FILE_UPLOAD.ALLOWED_EXTENSIONS},${FILE_UPLOAD.ALLOWED_MIME_TYPES.join(',')}`}
+                  maxFiles={FILE_UPLOAD.MAX_FILES}
+                  maxSize={FILE_UPLOAD.MAX_FILE_SIZE}
                   onFileReject={(_, message) => {
                     toast.error(message);
                   }}
@@ -271,7 +280,8 @@ export function ApplicationModal() {
                         Dra och släpp filer här
                       </p>
                       <p className="text-muted-foreground text-xs">
-                        Eller klicka för att bläddra (max 5 filer)
+                        Eller klicka för att bläddra (max{' '}
+                        {FILE_UPLOAD.MAX_FILES} filer)
                       </p>
                     </div>
                     <FileUploadTrigger asChild>
@@ -311,8 +321,10 @@ export function ApplicationModal() {
                   )}
                 </FileUpload>
                 <p className="text-muted-foreground text-xs">
-                  Ladda upp ditt CV och personligt brev. Godkända format: PDF,
-                  DOC, DOCX (Max 5MB per fil, upp till 5 filer)
+                  Ladda upp ditt CV och personligt brev. Godkända format:{' '}
+                  {FILE_UPLOAD.ALLOWED_TYPES_DESCRIPTION} (Max{' '}
+                  {FILE_UPLOAD.MAX_FILE_SIZE_DISPLAY} per fil, upp till{' '}
+                  {FILE_UPLOAD.MAX_FILES} filer)
                 </p>
                 <FieldError errors={field.state.meta.errors} />
               </div>
