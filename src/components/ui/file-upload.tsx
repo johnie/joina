@@ -1,8 +1,8 @@
 import { File as FileIcon } from 'lucide-react';
 import * as React from 'react';
+import { validateFiles } from '@/lib/file-validation';
 import { cn } from '@/lib/utils';
 
-// Context for managing file upload state
 type FileUploadContextValue = {
   value: File[];
   onValueChange: (files: File[]) => void;
@@ -25,7 +25,6 @@ function useFileUpload() {
   return context;
 }
 
-// Main FileUpload component
 type FileUploadProps = FileUploadContextValue & {
   children: React.ReactNode;
 };
@@ -57,7 +56,6 @@ export function FileUpload({
   );
 }
 
-// FileUploadDropzone - The drag and drop area
 type FileUploadDropzoneProps = React.HTMLAttributes<HTMLDivElement>;
 
 export function FileUploadDropzone({
@@ -70,52 +68,20 @@ export function FileUploadDropzone({
   const [isDragging, setIsDragging] = React.useState(false);
 
   const validateAndAddFiles = (newFiles: File[]) => {
-    const validFiles: File[] = [];
+    const result = validateFiles({
+      currentFiles: value,
+      newFiles,
+      accept,
+      maxFiles,
+      maxSize,
+    });
 
-    for (const file of newFiles) {
-      // Check max files
-      if (maxFiles && value.length + validFiles.length >= maxFiles) {
-        onFileReject?.(
-          file,
-          `Du kan maximalt ladda upp ${maxFiles} fil${maxFiles > 1 ? 'er' : ''}`,
-        );
-        break;
-      }
-
-      // Check file size
-      if (maxSize && file.size > maxSize) {
-        const sizeMB = Math.round(maxSize / 1024 / 1024);
-        onFileReject?.(file, `Filen får max vara ${sizeMB}MB`);
-        continue;
-      }
-
-      // Check accept types
-      if (accept) {
-        const acceptTypes = accept.split(',').map((t) => t.trim());
-        const fileExtension = `.${file.name.split('.').pop()?.toLowerCase()}`;
-        const mimeType = file.type;
-
-        const isAccepted = acceptTypes.some((type) => {
-          if (type.startsWith('.')) {
-            return type.toLowerCase() === fileExtension;
-          }
-          if (type.endsWith('/*')) {
-            return mimeType.startsWith(type.replace('/*', ''));
-          }
-          return type === mimeType;
-        });
-
-        if (!isAccepted) {
-          onFileReject?.(file, 'Filtypen stöds inte');
-          continue;
-        }
-      }
-
-      validFiles.push(file);
+    for (const error of result.errors) {
+      onFileReject?.(error.file, error.message);
     }
 
-    if (validFiles.length > 0) {
-      onValueChange([...value, ...validFiles]);
+    if (result.validFiles.length > 0) {
+      onValueChange([...value, ...result.validFiles]);
     }
   };
 
@@ -157,7 +123,6 @@ export function FileUploadDropzone({
   );
 }
 
-// FileUploadTrigger - Button to open file picker
 type FileUploadTriggerProps = React.HTMLAttributes<HTMLLabelElement> & {
   asChild?: boolean;
   children: React.ReactNode;
@@ -181,52 +146,20 @@ export function FileUploadTrigger({
   const inputId = React.useId();
 
   const validateAndAddFiles = (newFiles: File[]) => {
-    const validFiles: File[] = [];
+    const result = validateFiles({
+      currentFiles: value,
+      newFiles,
+      accept,
+      maxFiles,
+      maxSize,
+    });
 
-    for (const file of newFiles) {
-      // Check max files
-      if (maxFiles && value.length + validFiles.length >= maxFiles) {
-        onFileReject?.(
-          file,
-          `Du kan maximalt ladda upp ${maxFiles} fil${maxFiles > 1 ? 'er' : ''}`,
-        );
-        break;
-      }
-
-      // Check file size
-      if (maxSize && file.size > maxSize) {
-        const sizeMB = Math.round(maxSize / 1024 / 1024);
-        onFileReject?.(file, `Filen få max vara ${sizeMB}MB`);
-        continue;
-      }
-
-      // Check accept types
-      if (accept) {
-        const acceptTypes = accept.split(',').map((t) => t.trim());
-        const fileExtension = `.${file.name.split('.').pop()?.toLowerCase()}`;
-        const mimeType = file.type;
-
-        const isAccepted = acceptTypes.some((type) => {
-          if (type.startsWith('.')) {
-            return type.toLowerCase() === fileExtension;
-          }
-          if (type.endsWith('/*')) {
-            return mimeType.startsWith(type.replace('/*', ''));
-          }
-          return type === mimeType;
-        });
-
-        if (!isAccepted) {
-          onFileReject?.(file, 'Filtypen stöds inte');
-          continue;
-        }
-      }
-
-      validFiles.push(file);
+    for (const error of result.errors) {
+      onFileReject?.(error.file, error.message);
     }
 
-    if (validFiles.length > 0) {
-      onValueChange([...value, ...validFiles]);
+    if (result.validFiles.length > 0) {
+      onValueChange([...value, ...result.validFiles]);
     }
   };
 
@@ -235,7 +168,6 @@ export function FileUploadTrigger({
     if (files.length > 0) {
       validateAndAddFiles(files);
     }
-    // Reset input value to allow selecting the same file again
     e.target.value = '';
   };
 
@@ -252,7 +184,6 @@ export function FileUploadTrigger({
     }
   };
 
-  // If asChild, clone the child and add onClick handler
   if (asChild && React.isValidElement(children)) {
     return (
       <>
@@ -296,7 +227,6 @@ export function FileUploadTrigger({
   );
 }
 
-// FileUploadList - Container for file items
 type FileUploadListProps = React.HTMLAttributes<HTMLDivElement>;
 
 export function FileUploadList({
@@ -311,7 +241,6 @@ export function FileUploadList({
   );
 }
 
-// FileUploadItem context
 type FileUploadItemContextValue = {
   file: File;
   onDelete: () => void;
@@ -329,7 +258,6 @@ function useFileUploadItem() {
   return context;
 }
 
-// FileUploadItem - Individual file display
 type FileUploadItemProps = React.HTMLAttributes<HTMLDivElement> & {
   value: File;
 };
@@ -361,7 +289,6 @@ export function FileUploadItem({
   );
 }
 
-// FileUploadItemPreview - File icon preview
 type FileUploadItemPreviewProps = React.HTMLAttributes<HTMLDivElement>;
 
 export function FileUploadItemPreview({
@@ -385,7 +312,6 @@ export function FileUploadItemPreview({
   );
 }
 
-// FileUploadItemMetadata - File name and size
 type FileUploadItemMetadataProps = React.HTMLAttributes<HTMLDivElement>;
 
 export function FileUploadItemMetadata({
@@ -405,8 +331,6 @@ export function FileUploadItemMetadata({
 
     const extension = name.split('.').pop() || '';
     const nameWithoutExt = name.slice(0, name.lastIndexOf('.'));
-
-    // Reserve space for extension + ellipsis + dot
     const availableLength = maxLength - extension.length - 4;
 
     if (availableLength <= 0) {
@@ -428,7 +352,6 @@ export function FileUploadItemMetadata({
   );
 }
 
-// FileUploadItemDelete - Delete button
 type FileUploadItemDeleteProps = React.HTMLAttributes<HTMLButtonElement> & {
   asChild?: boolean;
   children?: React.ReactNode;
