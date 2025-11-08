@@ -1,8 +1,9 @@
 import { GitBranch } from 'lucide-react';
+import { GIT_SHA, GIT_SHA_URL } from '@/config';
 
 export function ShaStamp() {
-  const SHA = import.meta.env.VITE_GIT_SHA;
-  const SHA_URL = import.meta.env.VITE_GIT_SHA_URL;
+  const SHA = GIT_SHA;
+  const SHA_URL = GIT_SHA_URL;
   return (
     <div className="text-center text-xs text-muted-foreground mt-4">
       {SHA && (
