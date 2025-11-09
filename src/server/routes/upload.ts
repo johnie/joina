@@ -2,6 +2,7 @@ import { zValidator } from '@hono/zod-validator';
 import { Hono } from 'hono';
 import { z } from 'zod';
 import { FILE_UPLOAD, SUCCESS_MESSAGES, VALIDATION_MESSAGES } from '@/config';
+import { rateLimit } from '../middleware/rate-limit';
 import type { Bindings } from '../types/bindings';
 import {
   createErrorResponse,
@@ -13,6 +14,16 @@ import {
 import { slugifyEmail } from '../utils/slugify';
 
 const upload = new Hono<{ Bindings: Bindings }>();
+
+upload.use(
+  '/',
+  rateLimit({
+    maxRequests: 3,
+    windowMs: 60 * 60 * 1000,
+    message:
+      'Du har skickat in för många ansökningar. Försök igen om en stund.',
+  }),
+);
 
 const JobApplicationSchema = z.object({
   name: z.string().min(1, 'Namn krävs'),
