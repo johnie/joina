@@ -13,6 +13,7 @@
 		"build": "vite build",
 		"preview": "npm run build && wrangler dev",
 		"deploy": "npm run build && wrangler deploy",
+		"lint": "biome lint",
 		"biome:fix": "biome check --write --unsafe"
 	},
 	"dependencies": {
