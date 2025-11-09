@@ -15,6 +15,13 @@
 			"preview_bucket_name": "joina-bucket-preview"
 		}
 	],
+	"kv_namespaces": [
+		{
+			"binding": "RATE_LIMIT_KV",
+			"id": "40f8365cd1e5483db2dc03f751dc572f",
+			"preview_id": "c33582a11d82457d91f2c8800cb8655f"
+		}
+	],
 	"observability": {
 		"logs": {
 			"enabled": true,
