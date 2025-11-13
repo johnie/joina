@@ -67,8 +67,8 @@ export function FileUploadDropzone({
     useFileUpload();
   const [isDragging, setIsDragging] = React.useState(false);
 
-  const validateAndAddFiles = (newFiles: File[]) => {
-    const result = validateFiles({
+  const validateAndAddFiles = async (newFiles: File[]) => {
+    const result = await validateFiles({
       currentFiles: value,
       newFiles,
       accept,
@@ -90,7 +90,7 @@ export function FileUploadDropzone({
     setIsDragging(false);
 
     const files = Array.from(e.dataTransfer.files);
-    validateAndAddFiles(files);
+    void validateAndAddFiles(files);
   };
 
   const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
@@ -145,8 +145,8 @@ export function FileUploadTrigger({
   const inputRef = React.useRef<HTMLInputElement>(null);
   const inputId = React.useId();
 
-  const validateAndAddFiles = (newFiles: File[]) => {
-    const result = validateFiles({
+  const validateAndAddFiles = async (newFiles: File[]) => {
+    const result = await validateFiles({
       currentFiles: value,
       newFiles,
       accept,
@@ -166,7 +166,7 @@ export function FileUploadTrigger({
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files || []);
     if (files.length > 0) {
-      validateAndAddFiles(files);
+      void validateAndAddFiles(files);
     }
     e.target.value = '';
   };
