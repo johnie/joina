@@ -13,13 +13,68 @@ export type FileValidationOptions = {
   maxSize?: number;
 };
 
-export function validateFiles({
+/**
+ * Validates file signature (magic numbers) to prevent file type spoofing
+ */
+async function validateFileSignature(file: File): Promise<boolean> {
+  try {
+    // Read first 8 bytes for signature validation
+    const buffer = await file.slice(0, 8).arrayBuffer();
+    const bytes = new Uint8Array(buffer);
+
+    // PDF signature: %PDF (0x25 0x50 0x44 0x46)
+    if (
+      bytes[0] === 0x25 &&
+      bytes[1] === 0x50 &&
+      bytes[2] === 0x44 &&
+      bytes[3] === 0x46
+    ) {
+      return true;
+    }
+
+    // DOC signature: D0 CF 11 E0 A1 B1 1A E1 (OLE2/CFB format)
+    if (
+      bytes[0] === 0xd0 &&
+      bytes[1] === 0xcf &&
+      bytes[2] === 0x11 &&
+      bytes[3] === 0xe0 &&
+      bytes[4] === 0xa1 &&
+      bytes[5] === 0xb1 &&
+      bytes[6] === 0x1a &&
+      bytes[7] === 0xe1
+    ) {
+      return true;
+    }
+
+    // DOCX signature: PK (0x50 0x4B) - ZIP format
+    // DOCX files are ZIP archives, so they start with PK
+    if (
+      (bytes[0] === 0x50 &&
+        bytes[1] === 0x4b &&
+        bytes[2] === 0x03 &&
+        bytes[3] === 0x04) ||
+      (bytes[0] === 0x50 &&
+        bytes[1] === 0x4b &&
+        bytes[2] === 0x05 &&
+        bytes[3] === 0x06)
+    ) {
+      return true;
+    }
+
+    return false;
+  } catch {
+    // If signature validation fails, reject the file for safety
+    return false;
+  }
+}
+
+export async function validateFiles({
   currentFiles,
   newFiles,
   accept,
   maxFiles,
   maxSize,
-}: FileValidationOptions): FileValidationResult {
+}: FileValidationOptions): Promise<FileValidationResult> {
   const validFiles: File[] = [];
   const errors: Array<{ file: File; message: string }> = [];
 
@@ -62,6 +117,16 @@ export function validateFiles({
         });
         continue;
       }
+    }
+
+    // Validate file signature to prevent spoofing
+    const isValidSignature = await validateFileSignature(file);
+    if (!isValidSignature) {
+      errors.push({
+        file,
+        message: 'Filens innehåll matchar inte dess filtyp',
+      });
+      continue;
     }
 
     validFiles.push(file);

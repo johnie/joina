@@ -1,12 +1,8 @@
 import { Hono } from 'hono';
 import { cors } from 'hono/cors';
 import { logger } from 'hono/logger';
-import {
-  ALLOWED_HEADERS,
-  ALLOWED_HTTP_METHODS,
-  API_ENDPOINTS,
-  isDevelopment,
-} from '@/config';
+import { ALLOWED_HEADERS, ALLOWED_HTTP_METHODS, API_ENDPOINTS } from '@/config';
+import { rateLimiter } from './middleware/rate-limiter';
 import { robotsRoutes } from './routes/robots';
 import { sitemapRoutes } from './routes/sitemap';
 import { upload } from './routes/upload';
@@ -16,9 +12,14 @@ const app = new Hono<{ Bindings: Bindings }>();
 
 app.use('/api/*', logger());
 app.use('/api/*', (c, next) => {
+  // Dynamic CORS: Allow development origins and same-origin requests in production
+  const isDevelopment =
+    process.env.NODE_ENV === 'development' ||
+    process.env.WRANGLER_DEV === 'true';
+
   const origin = isDevelopment
-    ? '*'
-    : c.env.PRODUCTION_URL || 'https://joina.johnie.se';
+    ? '*' // Allow all origins in development
+    : new URL(c.req.url).origin; // Use current deployment URL in production/preview
 
   return cors({
     origin,
@@ -26,6 +27,16 @@ app.use('/api/*', (c, next) => {
     allowHeaders: ALLOWED_HEADERS,
   })(c, next);
 });
+
+// Rate limiting for upload endpoint: 3 uploads per 15 minutes per IP
+app.use(
+  API_ENDPOINTS.UPLOAD,
+  rateLimiter({
+    windowMs: 15 * 60 * 1000, // 15 minutes
+    limit: 3, // 3 requests per window
+    keyGenerator: (c) => c.req.header('cf-connecting-ip') ?? 'unknown',
+  }),
+);
 
 app.get(API_ENDPOINTS.HEALTH, (c) => {
   return c.json({ status: 'ok', timestamp: new Date().toISOString() });
