@@ -113,6 +113,11 @@ Forms use **TanStack Form** (`@tanstack/react-form`) with:
   - Exposes `import.meta.env.VITE_GIT_SHA` (short commit hash)
   - Exposes `import.meta.env.VITE_GIT_SHA_URL` (GitHub commit URL)
   - Used for deployment tracking and version display
+- **JSON-LD Plugin** (`vite.json-ld.ts`): Injects structured data for SEO
+  - Reads schema definitions from `json-ld.config.ts`
+  - Automatically injects `<script type="application/ld+json">` tags into `index.html`
+  - Configured with JobPosting schema for Google Jobs integration
+  - Minified in production, formatted in development
 
 ## Adding New Content
 
@@ -167,6 +172,9 @@ The worker has access to the following environment bindings (defined in `src/ser
 - **R2 Bucket**: `c.env.BUCKET` (configured in `wrangler.jsonc`)
   - Production bucket: `joina`
   - Preview bucket: `joina-bucket-preview`
+- **KV Namespace**: `c.env.RATE_LIMIT_KV` - Key-value storage for rate limiting
+  - Production: `40f8365cd1e5483db2dc03f751dc572f`
+  - Preview: `c33582a11d82457d91f2c8800cb8655f`
 - **PRODUCTION_URL**: `c.env.PRODUCTION_URL` - Production domain for CORS validation
 - **ENVIRONMENT**: `c.env.ENVIRONMENT` - Optional environment indicator
 
@@ -192,10 +200,11 @@ Update the production URL in `wrangler.jsonc`:
 1. **API Routes** (`/api/*`): Handled by Hono server
    - Routes run before static assets (`run_worker_first: ["/api/*", "/sitemap.xml", "/robots.txt"]`)
    - `GET /api/health`: Health check endpoint
-   - `POST /api/upload`: Job application submission with file uploads to R2
-   - `GET /sitemap.xml`: Sitemap generation (handled by worker)
-   - `GET /robots.txt`: Robots.txt generation (handled by worker)
-2. **Static Assets**: All other routes serve the React SPA via SPA routing
+   - `POST /api/upload`: Job application submission with file uploads to R2 (rate limited)
+2. **SEO Routes**: Server-rendered for crawlers
+   - `GET /sitemap.xml`: Dynamic sitemap generation based on site config (`src/server/routes/sitemap.ts`)
+   - `GET /robots.txt`: Dynamic robots.txt with sitemap reference (`src/server/routes/robots.ts`)
+3. **Static Assets**: All other routes serve the React SPA via SPA routing
 
 ### Build Process
 The build command (`pnpm build`) uses the **Cloudflare Vite plugin** to automatically build both client and server:
@@ -244,6 +253,15 @@ The build command (`pnpm build`) uses the **Cloudflare Vite plugin** to automati
    app.route('/api/example', exampleRoutes);
    ```
 
+### Rate Limiting
+The project implements IP-based rate limiting using Cloudflare KV:
+- **Middleware**: `src/server/middleware/rate-limit.ts`
+- **Storage**: Uses `RATE_LIMIT_KV` namespace for tracking request counts
+- **Configuration**: Customizable per route (max requests, time window, custom messages)
+- **Headers**: Returns standard rate limit headers (`X-RateLimit-Limit`, `X-RateLimit-Remaining`, `X-RateLimit-Reset`)
+- **Usage**: Applied to `/api/upload` endpoint (3 requests per hour per IP)
+- **IP Detection**: Reads from `x-forwarded-for` header (Cloudflare Workers standard)
+
 ### File Upload Handling
 The `/api/upload` endpoint demonstrates best practices:
 - **Validation**: Uses `@hono/zod-validator` for form validation
@@ -252,6 +270,14 @@ The `/api/upload` endpoint demonstrates best practices:
 - **JSON:API format**: Error and success responses follow JSON:API specification
 - **Constants**: Upload limits and messages centralized in `src/server/constants/upload`
 - **Utils**: Reusable JSON:API response helpers in `src/server/utils/jsonapi`
+
+### Shared Configuration
+The project uses a centralized configuration pattern in `src/config/`:
+- **api.ts**: API endpoints and HTTP constants (exported via barrel file)
+- **env.ts**: Environment detection helpers (`isDevelopment`, etc.)
+- **site.ts**: Site metadata and constants
+- **validation.ts**: Shared validation messages and file upload constants
+- **index.ts**: Barrel file re-exporting all configs for clean imports
 
 ## Deployment
 
