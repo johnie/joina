@@ -1,10 +1,12 @@
-import { allPages } from 'content-collections';
 import { Hono } from 'hono';
 import { SEO, SITE_URL } from '@/config';
 
 export const sitemapRoutes = new Hono();
 
-sitemapRoutes.get('/sitemap.xml', (c) => {
+sitemapRoutes.get('/sitemap.xml', async (c) => {
+  // Import inside handler to avoid global scope async operations
+  const { allPages } = await import('content-collections');
+
   const currentDate = new Date().toISOString().split('T')[0];
 
   const pages = allPages.map((page) => {
