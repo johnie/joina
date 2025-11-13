@@ -44,9 +44,6 @@ importers:
       hono:
         specifier: ^4.10.5
         version: 4.10.5
-      hono-rate-limiter:
-        specifier: ^0.4.2
-        version: 0.4.2(hono@4.10.5)
       lucide-react:
         specifier: ^0.553.0
         version: 0.553.0(react@19.2.0)
@@ -1847,11 +1844,6 @@ packages:
 
   hastscript@9.0.1:
     resolution: {integrity: sha512-g7df9rMFX/SPi34tyGCyUBREQoKkapwdY/T04Qn9TDWfHhAYt4/I0gMVirzK5wEzeUqIjEB+LXC/ypb7Aqno5w==}
-
-  hono-rate-limiter@0.4.2:
-    resolution: {integrity: sha512-AAtFqgADyrmbDijcRTT/HJfwqfvhalya2Zo+MgfdrMPas3zSMD8SU03cv+ZsYwRU1swv7zgVt0shwN059yzhjw==}
-    peerDependencies:
-      hono: ^4.1.1
 
   hono@4.10.5:
     resolution: {integrity: sha512-h/MXuTkoAK8NG1EfDp0jI1YLf6yGdDnfkebRO2pwEh5+hE3RAJFXkCsnD0vamSiARK4ZrB6MY+o3E/hCnOyHrQ==}
@@ -4265,10 +4257,6 @@ snapshots:
       hast-util-parse-selector: 4.0.0
       property-information: 7.1.0
       space-separated-tokens: 2.0.2
-
-  hono-rate-limiter@0.4.2(hono@4.10.5):
-    dependencies:
-      hono: 4.10.5
 
   hono@4.10.5: {}
 
