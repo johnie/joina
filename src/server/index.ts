@@ -12,7 +12,14 @@ const app = new Hono<{ Bindings: Bindings }>();
 
 app.use('/api/*', logger());
 app.use('/api/*', (c, next) => {
-  const origin = c.env.PRODUCTION_URL || '*';
+  // Dynamic CORS: Allow development origins and same-origin requests in production
+  const isDevelopment =
+    process.env.NODE_ENV === 'development' ||
+    process.env.WRANGLER_DEV === 'true';
+
+  const origin = isDevelopment
+    ? '*' // Allow all origins in development
+    : new URL(c.req.url).origin; // Use current deployment URL in production/preview
 
   return cors({
     origin,
