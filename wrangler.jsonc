@@ -22,8 +22,5 @@
 			"invocation_logs": true,
 			"persist": true
 		}
-	},
-	"vars": {
-		"PRODUCTION_URL": "https://joina.johnie.se"
 	}
 }
