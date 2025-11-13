@@ -1,8 +1,8 @@
 import { Hono } from 'hono';
 import { cors } from 'hono/cors';
 import { logger } from 'hono/logger';
-import { rateLimiter } from 'hono-rate-limiter';
 import { ALLOWED_HEADERS, ALLOWED_HTTP_METHODS, API_ENDPOINTS } from '@/config';
+import { rateLimiter } from './middleware/rate-limiter';
 import { robotsRoutes } from './routes/robots';
 import { sitemapRoutes } from './routes/sitemap';
 import { upload } from './routes/upload';
@@ -21,14 +21,13 @@ app.use('/api/*', (c, next) => {
   })(c, next);
 });
 
-// Rate limiting for upload endpoint: 5 uploads per 15 minutes per IP
+// Rate limiting for upload endpoint: 3 uploads per 15 minutes per IP
 app.use(
   API_ENDPOINTS.UPLOAD,
   rateLimiter({
     windowMs: 15 * 60 * 1000, // 15 minutes
     limit: 3, // 3 requests per window
     keyGenerator: (c) => c.req.header('cf-connecting-ip') ?? 'unknown',
-    standardHeaders: 'draft-7',
   }),
 );
 
