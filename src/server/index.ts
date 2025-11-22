@@ -35,12 +35,12 @@ app.use(
     windowMs: 15 * 60 * 1000, // 15 minutes
     limit: 3, // 3 requests per window
     keyGenerator: (c) => c.req.header('cf-connecting-ip') ?? 'unknown',
-  }),
+  })
 );
 
-app.get(API_ENDPOINTS.HEALTH, (c) => {
-  return c.json({ status: 'ok', timestamp: new Date().toISOString() });
-});
+app.get(API_ENDPOINTS.HEALTH, (c) =>
+  c.json({ status: 'ok', timestamp: new Date().toISOString() })
+);
 
 app.route(API_ENDPOINTS.UPLOAD, upload);
 

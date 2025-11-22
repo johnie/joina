@@ -1,5 +1,19 @@
 import { File as FileIcon } from 'lucide-react';
-import * as React from 'react';
+import {
+  type ChangeEvent,
+  cloneElement,
+  createContext,
+  type DragEvent,
+  type HTMLAttributes,
+  isValidElement,
+  type KeyboardEvent,
+  type MouseEvent,
+  type ReactNode,
+  useContext,
+  useId,
+  useRef,
+  useState,
+} from 'react';
 import { validateFiles } from '@/lib/file-validation';
 import { cn } from '@/lib/utils';
 
@@ -13,12 +27,12 @@ type FileUploadContextValue = {
   onFileReject?: (file: File, message: string) => void;
 };
 
-const FileUploadContext = React.createContext<
-  FileUploadContextValue | undefined
->(undefined);
+const FileUploadContext = createContext<FileUploadContextValue | undefined>(
+  undefined
+);
 
 function useFileUpload() {
-  const context = React.useContext(FileUploadContext);
+  const context = useContext(FileUploadContext);
   if (!context) {
     throw new Error('useFileUpload must be used within FileUpload');
   }
@@ -26,7 +40,7 @@ function useFileUpload() {
 }
 
 type FileUploadProps = FileUploadContextValue & {
-  children: React.ReactNode;
+  children: ReactNode;
 };
 
 export function FileUpload({
@@ -51,12 +65,12 @@ export function FileUpload({
         onFileReject,
       }}
     >
-      <div className="space-y-4 min-w-0 w-full">{children}</div>
+      <div className="w-full min-w-0 space-y-4">{children}</div>
     </FileUploadContext.Provider>
   );
 }
 
-type FileUploadDropzoneProps = React.HTMLAttributes<HTMLDivElement>;
+type FileUploadDropzoneProps = HTMLAttributes<HTMLDivElement>;
 
 export function FileUploadDropzone({
   className,
@@ -65,7 +79,7 @@ export function FileUploadDropzone({
 }: FileUploadDropzoneProps) {
   const { value, onValueChange, accept, maxFiles, maxSize, onFileReject } =
     useFileUpload();
-  const [isDragging, setIsDragging] = React.useState(false);
+  const [isDragging, setIsDragging] = useState(false);
 
   const validateAndAddFiles = async (newFiles: File[]) => {
     const result = await validateFiles({
@@ -85,47 +99,52 @@ export function FileUploadDropzone({
     }
   };
 
-  const handleDrop = (e: React.DragEvent<HTMLDivElement>) => {
+  const handleDrop = (e: DragEvent<HTMLDivElement>) => {
     e.preventDefault();
     setIsDragging(false);
 
     const files = Array.from(e.dataTransfer.files);
-    void validateAndAddFiles(files);
+    validateAndAddFiles(files);
   };
 
-  const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
+  const handleDragOver = (e: DragEvent<HTMLDivElement>) => {
     e.preventDefault();
     setIsDragging(true);
   };
 
-  const handleDragLeave = (e: React.DragEvent<HTMLDivElement>) => {
+  const handleDragLeave = (e: DragEvent<HTMLDivElement>) => {
     e.preventDefault();
     setIsDragging(false);
   };
 
   return (
-    <section
-      aria-label="Filuppladdningsområde"
-      onDrop={handleDrop}
-      onDragOver={handleDragOver}
-      onDragLeave={handleDragLeave}
+    // biome-ignore lint/a11y/noNoninteractiveElementInteractions: Drag-and-drop zone requires event handlers
+    // biome-ignore lint/a11y/noStaticElementInteractions: Drag-and-drop zone is inherently interactive
+    <div
+      aria-describedby="file-upload-instructions"
       className={cn(
-        'flex flex-col min-h-[120px] items-center justify-center gap-2 rounded-lg border-2 border-dashed px-6 py-4 transition-colors',
+        'flex min-h-[120px] flex-col items-center justify-center gap-2 rounded-lg border-2 border-dashed px-6 py-4 transition-colors',
         isDragging
           ? 'border-primary bg-primary/5'
           : 'border-muted-foreground/25',
-        className,
+        className
       )}
+      onDragLeave={handleDragLeave}
+      onDragOver={handleDragOver}
+      onDrop={handleDrop}
       {...props}
     >
+      <span className="sr-only" id="file-upload-instructions">
+        Filuppladdningsområde
+      </span>
       {children}
-    </section>
+    </div>
   );
 }
 
-type FileUploadTriggerProps = React.HTMLAttributes<HTMLLabelElement> & {
+type FileUploadTriggerProps = HTMLAttributes<HTMLButtonElement> & {
   asChild?: boolean;
-  children: React.ReactNode;
+  children: ReactNode;
 };
 
 export function FileUploadTrigger({
@@ -142,8 +161,8 @@ export function FileUploadTrigger({
     maxSize,
     onFileReject,
   } = useFileUpload();
-  const inputRef = React.useRef<HTMLInputElement>(null);
-  const inputId = React.useId();
+  const inputRef = useRef<HTMLInputElement>(null);
+  const inputId = useId();
 
   const validateAndAddFiles = async (newFiles: File[]) => {
     const result = await validateFiles({
@@ -163,41 +182,41 @@ export function FileUploadTrigger({
     }
   };
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileChange = (e: ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files || []);
     if (files.length > 0) {
-      void validateAndAddFiles(files);
+      validateAndAddFiles(files);
     }
     e.target.value = '';
   };
 
-  const handleClick = (e: React.MouseEvent) => {
+  const handleClick = (e: MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
     inputRef.current?.click();
   };
 
-  const handleKeyDown = (e: React.KeyboardEvent) => {
+  const handleKeyDown = (e: KeyboardEvent) => {
     if (e.key === 'Enter' || e.key === ' ') {
       e.preventDefault();
       inputRef.current?.click();
     }
   };
 
-  if (asChild && React.isValidElement(children)) {
+  if (asChild && isValidElement(children)) {
     return (
       <>
-        {React.cloneElement(children, {
+        {cloneElement(children, {
           onClick: handleClick,
           ...props,
-        } as React.HTMLAttributes<HTMLElement>)}
+        } as HTMLAttributes<HTMLElement>)}
         <input
+          accept={accept}
+          className="sr-only"
+          multiple={multiple}
+          onChange={handleFileChange}
           ref={inputRef}
           type="file"
-          accept={accept}
-          multiple={multiple}
-          className="sr-only"
-          onChange={handleFileChange}
         />
       </>
     );
@@ -205,29 +224,30 @@ export function FileUploadTrigger({
 
   return (
     <>
-      <label
+      <button
         {...props}
-        htmlFor={inputId}
+        className="cursor-pointer"
         onClick={handleClick}
         onKeyDown={handleKeyDown}
-        className="cursor-pointer"
+        type="button"
       >
         {children}
-      </label>
+      </button>
       <input
+        accept={accept}
+        aria-label="Välj filer"
+        className="sr-only"
         id={inputId}
+        multiple={multiple}
+        onChange={handleFileChange}
         ref={inputRef}
         type="file"
-        accept={accept}
-        multiple={multiple}
-        className="sr-only"
-        onChange={handleFileChange}
       />
     </>
   );
 }
 
-type FileUploadListProps = React.HTMLAttributes<HTMLDivElement>;
+type FileUploadListProps = HTMLAttributes<HTMLDivElement>;
 
 export function FileUploadList({
   className,
@@ -235,7 +255,7 @@ export function FileUploadList({
   ...props
 }: FileUploadListProps) {
   return (
-    <div className={cn('space-y-2 min-w-0 w-full', className)} {...props}>
+    <div className={cn('w-full min-w-0 space-y-2', className)} {...props}>
       {children}
     </div>
   );
@@ -246,19 +266,19 @@ type FileUploadItemContextValue = {
   onDelete: () => void;
 };
 
-const FileUploadItemContext = React.createContext<
+const FileUploadItemContext = createContext<
   FileUploadItemContextValue | undefined
 >(undefined);
 
 function useFileUploadItem() {
-  const context = React.useContext(FileUploadItemContext);
+  const context = useContext(FileUploadItemContext);
   if (!context) {
     throw new Error('useFileUploadItem must be used within FileUploadItem');
   }
   return context;
 }
 
-type FileUploadItemProps = React.HTMLAttributes<HTMLDivElement> & {
+type FileUploadItemProps = HTMLAttributes<HTMLDivElement> & {
   value: File;
 };
 
@@ -278,8 +298,8 @@ export function FileUploadItem({
     <FileUploadItemContext.Provider value={{ file, onDelete: handleDelete }}>
       <div
         className={cn(
-          'flex items-center gap-3 rounded-lg border bg-card p-3 min-w-0',
-          className,
+          'flex min-w-0 items-center gap-3 rounded-lg border bg-card p-3',
+          className
         )}
         {...props}
       >
@@ -289,7 +309,7 @@ export function FileUploadItem({
   );
 }
 
-type FileUploadItemPreviewProps = React.HTMLAttributes<HTMLDivElement>;
+type FileUploadItemPreviewProps = HTMLAttributes<HTMLDivElement>;
 
 export function FileUploadItemPreview({
   className,
@@ -303,7 +323,7 @@ export function FileUploadItemPreview({
       className={cn(
         'flex size-10 shrink-0 items-center justify-center rounded-md',
         isPDF ? 'bg-red-100 text-red-600' : 'bg-blue-100 text-blue-600',
-        className,
+        className
       )}
       {...props}
     >
@@ -312,7 +332,7 @@ export function FileUploadItemPreview({
   );
 }
 
-type FileUploadItemMetadataProps = React.HTMLAttributes<HTMLDivElement>;
+type FileUploadItemMetadataProps = HTMLAttributes<HTMLDivElement>;
 
 export function FileUploadItemMetadata({
   className,
@@ -321,13 +341,19 @@ export function FileUploadItemMetadata({
   const { file } = useFileUploadItem();
 
   const formatFileSize = (bytes: number) => {
-    if (bytes < 1024) return `${bytes} B`;
-    if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
+    if (bytes < 1024) {
+      return `${bytes} B`;
+    }
+    if (bytes < 1024 * 1024) {
+      return `${(bytes / 1024).toFixed(1)} KB`;
+    }
     return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
   };
 
-  const truncateFileName = (name: string, maxLength: number = 30) => {
-    if (name.length <= maxLength) return name;
+  const truncateFileName = (name: string, maxLength = 30) => {
+    if (name.length <= maxLength) {
+      return name;
+    }
 
     const extension = name.split('.').pop() || '';
     const nameWithoutExt = name.slice(0, name.lastIndexOf('.'));
@@ -342,19 +368,19 @@ export function FileUploadItemMetadata({
 
   return (
     <div className={cn('min-w-0 flex-1', className)} {...props}>
-      <p className="text-sm font-medium wrap-break-word" title={file.name}>
+      <p className="wrap-break-word font-medium text-sm" title={file.name}>
         {truncateFileName(file.name)}
       </p>
-      <p className="text-xs text-muted-foreground">
+      <p className="text-muted-foreground text-xs">
         {formatFileSize(file.size)}
       </p>
     </div>
   );
 }
 
-type FileUploadItemDeleteProps = React.HTMLAttributes<HTMLButtonElement> & {
+type FileUploadItemDeleteProps = HTMLAttributes<HTMLButtonElement> & {
   asChild?: boolean;
-  children?: React.ReactNode;
+  children?: ReactNode;
 };
 
 export function FileUploadItemDelete({
@@ -364,15 +390,15 @@ export function FileUploadItemDelete({
 }: FileUploadItemDeleteProps) {
   const { onDelete } = useFileUploadItem();
 
-  if (asChild && React.isValidElement(children)) {
-    return React.cloneElement(children, {
+  if (asChild && isValidElement(children)) {
+    return cloneElement(children, {
       onClick: onDelete,
       ...props,
-    } as React.HTMLAttributes<HTMLElement>);
+    } as HTMLAttributes<HTMLElement>);
   }
 
   return (
-    <button type="button" onClick={onDelete} {...props}>
+    <button onClick={onDelete} type="button" {...props}>
       {children}
     </button>
   );

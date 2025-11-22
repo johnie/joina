@@ -2,6 +2,9 @@ import { render, screen } from '@testing-library/react';
 import { describe, expect, it } from 'vitest';
 import { ApplyCard } from './apply-card';
 
+const APPLICATION_DEADLINE_REGEX = /31 januari 2026/i;
+const PERSONAL_LETTER_REGEX = /Ett personligt brev/i;
+
 describe('ApplyCard', () => {
   it('renders the component with application information', () => {
     render(<ApplyCard />);
@@ -18,7 +21,7 @@ describe('ApplyCard', () => {
 
     expect(screen.getByText('Sista ansökningsdag')).toBeInTheDocument();
     // Application deadline should be visible
-    expect(screen.getByText(/31 januari 2026/i)).toBeInTheDocument();
+    expect(screen.getByText(APPLICATION_DEADLINE_REGEX)).toBeInTheDocument();
   });
 
   it('includes both application methods', () => {
@@ -34,7 +37,7 @@ describe('ApplyCard', () => {
   it('displays required application materials', () => {
     render(<ApplyCard />);
 
-    expect(screen.getByText(/Ett personligt brev/i)).toBeInTheDocument();
+    expect(screen.getByText(PERSONAL_LETTER_REGEX)).toBeInTheDocument();
     expect(screen.getByText('Ditt CV')).toBeInTheDocument();
   });
 });

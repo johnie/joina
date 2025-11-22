@@ -22,14 +22,14 @@ export function JobMetaCard({ items, className }: JobMetaCardProps) {
   return (
     <Card className={cn('bg-muted', className)}>
       <CardContent>
-        <dl className="flex flex-wrap justify-center items-center mb-0 mt-0">
+        <dl className="mt-0 mb-0 flex flex-wrap items-center justify-center">
           {items.map((item, i) => (
             <div
-              className="flex w-full justify-between items-center"
+              className="flex w-full items-center justify-between"
               key={`${String(item.label)}-${i}`}
             >
-              <dt className="text-sm font-semibold p-0 mt-0">{item.label}</dt>
-              <dd className="text-sm leading-relaxed p-0 mt-0">{item.value}</dd>
+              <dt className="mt-0 p-0 font-semibold text-sm">{item.label}</dt>
+              <dd className="mt-0 p-0 text-sm leading-relaxed">{item.value}</dd>
             </div>
           ))}
         </dl>

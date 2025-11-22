@@ -27,7 +27,7 @@ const MDX_COMPONENTS = {
 
 function App() {
   const indexPage = allPages.find(
-    (page) => page._meta.fileName === 'index.mdx',
+    (page) => page._meta.fileName === 'index.mdx'
   );
 
   if (!indexPage) {
@@ -36,13 +36,13 @@ function App() {
 
   return (
     <main>
-      <article className="prose prose-stone dark:prose-invert prose-headings:text-amber-600 prose-headings:font-heading prose-ul:leading-tight prose-ol:leading-tight prose-p:leading-7 text-sm prose-a:text-teal-500 prose-a:underline-offset-4 prose-ul:list-disc marker:text-teal-500 max-w-full">
-        <p className="text-muted-foreground text-sm text-center gap-2 flex justify-center items-center">
+      <article className="prose prose-stone dark:prose-invert max-w-full prose-ul:list-disc prose-headings:font-heading prose-a:text-teal-500 prose-headings:text-amber-600 text-sm prose-ol:leading-tight prose-p:leading-7 prose-ul:leading-tight prose-a:underline-offset-4 marker:text-teal-500">
+        <p className="flex items-center justify-center gap-2 text-center text-muted-foreground text-sm">
           <span>Personlig Assistans</span>
           <span className="text-amber-600">•</span>
           <span>Sigtuna/Stockholm</span>
         </p>
-        <h1 className="scroll-m-20 text-center text-4xl font-extrabold tracking-tight text-balance">
+        <h1 className="scroll-m-20 text-balance text-center font-extrabold text-4xl tracking-tight">
           {indexPage.title}
         </h1>
         <MDXContent code={indexPage.mdx} components={MDX_COMPONENTS} />
@@ -50,14 +50,14 @@ function App() {
         <JobMetaCard items={JOB_METADATA} />
       </article>
       <a
-        href={COMPANY_INFO.url}
-        target="_blank"
-        rel="noopener noreferrer"
         aria-label={COMPANY_INFO.name}
+        href={COMPANY_INFO.url}
+        rel="noopener noreferrer"
+        target="_blank"
       >
         <GodOmsorgLogo className="mx-auto mt-8" />
       </a>
-      <p className="text-center text-sm text-muted-foreground mt-2">
+      <p className="mt-2 text-center text-muted-foreground text-sm">
         {COMPANY_INFO.description}
       </p>
       <ShaStamp />

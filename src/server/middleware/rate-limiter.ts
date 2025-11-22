@@ -1,18 +1,18 @@
 import type { Context, MiddlewareHandler } from 'hono';
 import { createErrorResponse, createValidationError } from '../utils/jsonapi';
 
-interface RateLimitStore {
+type RateLimitStore = {
   [key: string]: {
     count: number;
     resetAt: number;
   };
-}
+};
 
-interface RateLimiterOptions {
+type RateLimiterOptions = {
   windowMs: number; // Time window in milliseconds
   limit: number; // Max requests per window
   keyGenerator: (c: Context) => string; // Function to generate unique key per client
-}
+};
 
 // In-memory store for rate limiting
 // In production, consider using Durable Objects or KV for persistence
@@ -56,15 +56,15 @@ export function rateLimiter(options: RateLimiterOptions): MiddlewareHandler {
       return c.json(
         createErrorResponse(
           createValidationError(
-            'För många förfrågningar. Försök igen om några minuter.',
-          ),
+            'För många förfrågningar. Försök igen om några minuter.'
+          )
         ),
-        429,
+        429
       );
     }
 
     // Increment count
-    entry.count++;
+    entry.count += 1;
 
     // Set rate limit headers
     c.header('X-RateLimit-Limit', limit.toString());

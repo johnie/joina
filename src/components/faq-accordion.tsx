@@ -10,7 +10,7 @@ export function FaqAccordion() {
   const sortedQnas = allQnas.sort((a, b) => a.order - b.order);
 
   return (
-    <Accordion type="single" collapsible className="w-full not-prose">
+    <Accordion className="not-prose w-full" collapsible type="single">
       {sortedQnas.map((item, index) => (
         <AccordionItem key={item._meta.path} value={`item-${index + 1}`}>
           <AccordionTrigger className="text-left font-bold">
