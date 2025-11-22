@@ -57,9 +57,6 @@ function App() {
       >
         <GodOmsorgLogo className="mx-auto mt-8" />
       </a>
-      <p className="mt-2 text-center text-muted-foreground text-sm">
-        {COMPANY_INFO.description}
-      </p>
       <ShaStamp />
     </main>
   );
