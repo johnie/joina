@@ -1,7 +1,7 @@
 {
-	"permissions": {
-		"allow": ["mcp__context7__resolve-library-id"],
-		"deny": [],
-		"ask": []
-	}
+    "permissions": {
+        "allow": ["mcp__context7__resolve-library-id"],
+        "deny": [],
+        "ask": []
+    }
 }
