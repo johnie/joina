@@ -1,33 +1,30 @@
 {
-	"compilerOptions": {
-		"tsBuildInfoFile": "./node_modules/.tmp/tsconfig.node.tsbuildinfo",
-		"target": "ES2023",
-		"lib": ["ES2023"],
-		"module": "ESNext",
-		"types": ["node"],
-		"skipLibCheck": true,
-
-		/* Bundler mode */
-		"moduleResolution": "bundler",
-		"allowImportingTsExtensions": true,
-		"verbatimModuleSyntax": true,
-		"moduleDetection": "force",
-		"noEmit": true,
-
-		/* Linting */
-		"strict": true,
-		"noUnusedLocals": true,
-		"noUnusedParameters": true,
-		"erasableSyntaxOnly": true,
-		"noFallthroughCasesInSwitch": true,
-		"noUncheckedSideEffectImports": true
-	},
-	"include": [
-		"vite.config.ts",
-		"vite.git-sha.ts",
-		"vite.json-ld.ts",
-		"vitest.config.ts",
-		"content-collections.ts",
-		"json-ld.config.ts"
-	]
+    "compilerOptions": {
+        "tsBuildInfoFile": "./node_modules/.tmp/tsconfig.node.tsbuildinfo",
+        "target": "ES2023",
+        "lib": ["ES2023"],
+        "module": "ESNext",
+        "types": ["node"],
+        "skipLibCheck": true,
+        "moduleResolution": "bundler",
+        "allowImportingTsExtensions": true,
+        "verbatimModuleSyntax": true,
+        "moduleDetection": "force",
+        "noEmit": true,
+        "strict": true,
+        "noUnusedLocals": true,
+        "noUnusedParameters": true,
+        "erasableSyntaxOnly": true,
+        "noFallthroughCasesInSwitch": true,
+        "noUncheckedSideEffectImports": true,
+        "strictNullChecks": true
+    },
+    "include": [
+        "vite.config.ts",
+        "vite.git-sha.ts",
+        "vite.json-ld.ts",
+        "vitest.config.ts",
+        "content-collections.ts",
+        "json-ld.config.ts"
+    ]
 }
