@@ -1,7 +1,7 @@
 import type { Thing, WithContext } from 'schema-dts';
 import type { Plugin } from 'vite';
 
-export interface JsonLdPluginOptions {
+export type JsonLdPluginOptions = {
   /**
    * JSON-LD structured data to inject
    * Can be a single schema or an array of schemas
@@ -17,7 +17,7 @@ export interface JsonLdPluginOptions {
    * @default true in production, false in development
    */
   minify?: boolean;
-}
+};
 
 /**
  * Vite plugin to inject JSON-LD structured data into index.html
@@ -56,13 +56,12 @@ export default function jsonLdPlugin(options: JsonLdPluginOptions): Plugin {
 
             if (minify) {
               return `<script type="application/ld+json">\n${json}\n</script>`;
-            } else {
-              const indentedJson = json
-                .split('\n')
-                .map((line) => (line ? `  ${line}` : line))
-                .join('\n');
-              return `<script type="application/ld+json">\n${indentedJson}\n</script>`;
             }
+            const indentedJson = json
+              .split('\n')
+              .map((line) => (line ? `  ${line}` : line))
+              .join('\n');
+            return `<script type="application/ld+json">\n${indentedJson}\n</script>`;
           })
           .join('\n');
 

@@ -13,17 +13,17 @@ describe('validateFiles', () => {
       createMockFile(
         'test1.pdf',
         'application/pdf',
-        new Uint8Array([0x25, 0x50, 0x44, 0x46]),
+        new Uint8Array([0x25, 0x50, 0x44, 0x46])
       ),
       createMockFile(
         'test2.pdf',
         'application/pdf',
-        new Uint8Array([0x25, 0x50, 0x44, 0x46]),
+        new Uint8Array([0x25, 0x50, 0x44, 0x46])
       ),
       createMockFile(
         'test3.pdf',
         'application/pdf',
-        new Uint8Array([0x25, 0x50, 0x44, 0x46]),
+        new Uint8Array([0x25, 0x50, 0x44, 0x46])
       ),
     ];
 

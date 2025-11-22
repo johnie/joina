@@ -16,7 +16,7 @@ export function ApplyCard() {
     <>
       <Card className="not-prose my-8">
         <CardHeader>
-          <CardTitle className="text-xl text-amber-600 font-heading">
+          <CardTitle className="font-heading text-amber-600 text-xl">
             Så här ansöker du
           </CardTitle>
           <CardDescription className="text-stone-700 dark:text-stone-300">
@@ -42,18 +42,18 @@ export function ApplyCard() {
               </li>
             </ul>
           </div>
-          <div className="rounded-lg bg-white/50 dark:bg-stone-900/50 p-4 border border-stone-200 dark:border-stone-700">
-            <p className="text-sm font-medium text-stone-900 dark:text-stone-100 mb-1">
+          <div className="rounded-lg border border-stone-200 bg-white/50 p-4 dark:border-stone-700 dark:bg-stone-900/50">
+            <p className="mb-1 font-medium text-sm text-stone-900 dark:text-stone-100">
               Eller skicka din ansökan till:
             </p>
             <a
+              className="font-semibold text-lg text-teal-600 hover:underline dark:text-teal-400"
               href="mailto:jobb@johnie.se?subject=Ansökan: Personlig Assistent"
-              className="text-lg font-semibold text-teal-600 dark:text-teal-400 hover:underline"
             >
               jobb@johnie.se
             </a>
           </div>
-          <p className="text-xs text-stone-600 dark:text-stone-400 italic">
+          <p className="text-stone-600 text-xs italic dark:text-stone-400">
             Vi går igenom ansökningar löpande och kan komma att tillsätta
             tjänsten innan sista ansökningsdagen, så skicka gärna in din ansökan
             så snart som möjligt.
@@ -62,10 +62,10 @@ export function ApplyCard() {
         <CardFooter className="flex flex-col gap-2 sm:flex-row">
           <ApplicationModal />
           <Button
+            asChild
+            className="w-full border-teal-600 text-teal-600 hover:bg-teal-50 sm:w-auto dark:border-teal-400 dark:text-teal-400 dark:hover:bg-teal-950"
             size="lg"
             variant="outline"
-            className="w-full sm:w-auto border-teal-600 text-teal-600 hover:bg-teal-50 dark:border-teal-400 dark:text-teal-400 dark:hover:bg-teal-950"
-            asChild
           >
             <a href="mailto:jobb@johnie.se?subject=Ansökan: Personlig Assistent">
               <Mail />
@@ -74,13 +74,13 @@ export function ApplyCard() {
           </Button>
         </CardFooter>
       </Card>
-      <div className="not-prose flex items-center gap-3 rounded-lg bg-amber-950/30 p-4 border border-amber-900 mb-8">
+      <div className="not-prose mb-8 flex items-center gap-3 rounded-lg border border-amber-900 bg-amber-950/30 p-4">
         <Calendar className="h-5 w-5 text-amber-400" />
         <div>
-          <p className="text-sm font-medium text-stone-900 dark:text-stone-100">
+          <p className="font-medium text-sm text-stone-900 dark:text-stone-100">
             Sista ansökningsdag
           </p>
-          <p className="text-lg font-semibold text-amber-400">
+          <p className="font-semibold text-amber-400 text-lg">
             {APPLICATION_DEADLINE}
           </p>
         </div>

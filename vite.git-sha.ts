@@ -2,14 +2,19 @@ import { execSync } from 'node:child_process';
 import type { Plugin } from 'vite';
 import pkg from './package.json';
 
-export interface GitShaPluginOptions {
+export type GitShaPluginOptions = {
   branchName?: string;
-}
+};
+
+const GIT_PREFIX_REGEX = /^git\+/;
+const GIT_SUFFIX_REGEX = /\.git$/;
 
 function getRepoUrl(): string | null {
   let url = pkg.repository?.url;
-  if (!url) return null;
-  url = url.replace(/^git\+/, '').replace(/\.git$/, '');
+  if (!url) {
+    return null;
+  }
+  url = url.replace(GIT_PREFIX_REGEX, '').replace(GIT_SUFFIX_REGEX, '');
   if (url.startsWith('git@github.com:')) {
     url = url.replace('git@github.com:', 'https://github.com/');
   }
@@ -17,7 +22,7 @@ function getRepoUrl(): string | null {
 }
 
 export default function gitShaPlugin(
-  options: GitShaPluginOptions = {},
+  options: GitShaPluginOptions = {}
 ): Plugin {
   const branchName = options.branchName || 'main';
   const repoUrl = getRepoUrl();

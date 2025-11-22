@@ -5,16 +5,16 @@ export function ShaStamp() {
   const SHA = GIT_SHA;
   const SHA_URL = GIT_SHA_URL;
   return (
-    <div className="text-center text-xs text-muted-foreground mt-4">
+    <div className="mt-4 text-center text-muted-foreground text-xs">
       {SHA && (
         <span>
           <a
+            className="inline-flex items-center gap-1 hover:underline"
             href={SHA_URL}
-            target="_blank"
             rel="noopener noreferrer"
-            className="hover:underline inline-flex items-center gap-1"
+            target="_blank"
           >
-            <GitBranch className="w-3 h-3" />
+            <GitBranch className="h-3 w-3" />
             {SHA}
           </a>
         </span>

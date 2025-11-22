@@ -68,6 +68,58 @@ async function validateFileSignature(file: File): Promise<boolean> {
   }
 }
 
+/**
+ * Checks if adding more files would exceed the maximum file count
+ */
+function exceedsMaxFiles(
+  currentCount: number,
+  validCount: number,
+  maxFiles?: number
+): boolean {
+  if (!maxFiles) {
+    return false;
+  }
+  return currentCount + validCount >= maxFiles;
+}
+
+/**
+ * Validates file size against maximum allowed size
+ */
+function validateFileSize(file: File, maxSize?: number): string | null {
+  if (!maxSize) {
+    return null;
+  }
+  if (file.size > maxSize) {
+    return `Filen får max vara ${FILE_UPLOAD.MAX_FILE_SIZE_DISPLAY}`;
+  }
+  return null;
+}
+
+/**
+ * Validates file type against accepted types
+ */
+function validateFileType(file: File, accept?: string): string | null {
+  if (!accept) {
+    return null;
+  }
+
+  const acceptTypes = accept.split(',').map((t) => t.trim());
+  const fileExtension = `.${file.name.split('.').pop()?.toLowerCase()}`;
+  const mimeType = file.type;
+
+  const isAccepted = acceptTypes.some((type) => {
+    if (type.startsWith('.')) {
+      return type.toLowerCase() === fileExtension;
+    }
+    if (type.endsWith('/*')) {
+      return mimeType.startsWith(type.replace('/*', ''));
+    }
+    return type === mimeType;
+  });
+
+  return isAccepted ? null : 'Filtypen stöds inte';
+}
+
 export async function validateFiles({
   currentFiles,
   newFiles,
@@ -79,44 +131,24 @@ export async function validateFiles({
   const errors: Array<{ file: File; message: string }> = [];
 
   for (const file of newFiles) {
-    if (maxFiles && currentFiles.length + validFiles.length >= maxFiles) {
+    if (exceedsMaxFiles(currentFiles.length, validFiles.length, maxFiles)) {
       errors.push({
         file,
-        message: `Du kan maximalt ladda upp ${maxFiles} fil${maxFiles > 1 ? 'er' : ''}`,
+        message: `Du kan maximalt ladda upp ${maxFiles} fil${maxFiles && maxFiles > 1 ? 'er' : ''}`,
       });
       break;
     }
 
-    if (maxSize && file.size > maxSize) {
-      errors.push({
-        file,
-        message: `Filen får max vara ${FILE_UPLOAD.MAX_FILE_SIZE_DISPLAY}`,
-      });
+    const sizeError = validateFileSize(file, maxSize);
+    if (sizeError) {
+      errors.push({ file, message: sizeError });
       continue;
     }
 
-    if (accept) {
-      const acceptTypes = accept.split(',').map((t) => t.trim());
-      const fileExtension = `.${file.name.split('.').pop()?.toLowerCase()}`;
-      const mimeType = file.type;
-
-      const isAccepted = acceptTypes.some((type) => {
-        if (type.startsWith('.')) {
-          return type.toLowerCase() === fileExtension;
-        }
-        if (type.endsWith('/*')) {
-          return mimeType.startsWith(type.replace('/*', ''));
-        }
-        return type === mimeType;
-      });
-
-      if (!isAccepted) {
-        errors.push({
-          file,
-          message: 'Filtypen stöds inte',
-        });
-        continue;
-      }
+    const typeError = validateFileType(file, accept);
+    if (typeError) {
+      errors.push({ file, message: typeError });
+      continue;
     }
 
     // Validate file signature to prevent spoofing

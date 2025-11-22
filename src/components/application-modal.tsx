@@ -1,6 +1,6 @@
 import { useForm } from '@tanstack/react-form';
 import { Upload, X } from 'lucide-react';
-import * as React from 'react';
+import { useState } from 'react';
 import { toast } from 'sonner';
 import { z } from 'zod';
 import { Button } from '@/components/ui/button';
@@ -65,35 +65,37 @@ const applicationSchema = z.object({
     .string()
     .min(
       FORM_VALIDATION.NAME.MIN_LENGTH,
-      VALIDATION_MESSAGES.NAME_TOO_SHORT(FORM_VALIDATION.NAME.MIN_LENGTH),
+      VALIDATION_MESSAGES.NAME_TOO_SHORT(FORM_VALIDATION.NAME.MIN_LENGTH)
     ),
   email: z.email(VALIDATION_MESSAGES.INVALID_EMAIL),
   phone: z
     .string()
     .min(
       FORM_VALIDATION.PHONE.MIN_LENGTH,
-      VALIDATION_MESSAGES.PHONE_TOO_SHORT(FORM_VALIDATION.PHONE.MIN_LENGTH),
+      VALIDATION_MESSAGES.PHONE_TOO_SHORT(FORM_VALIDATION.PHONE.MIN_LENGTH)
     )
     .regex(
       FORM_VALIDATION.PHONE.PATTERN,
-      VALIDATION_MESSAGES.INVALID_PHONE_FORMAT,
+      VALIDATION_MESSAGES.INVALID_PHONE_FORMAT
     ),
 });
 
 function FieldError({ errors }: { errors: (string | undefined)[] }) {
   const errorMessages = errors.filter(
-    (error): error is string => error !== undefined,
+    (error): error is string => error !== undefined
   );
-  if (errorMessages.length === 0) return null;
+  if (errorMessages.length === 0) {
+    return null;
+  }
   return (
-    <p className="text-destructive text-sm font-medium" role="alert">
+    <p className="font-medium text-destructive text-sm" role="alert">
       {errorMessages[0]}
     </p>
   );
 }
 
 export function ApplicationModal() {
-  const [open, setOpen] = React.useState(false);
+  const [open, setOpen] = useState(false);
 
   const form = useForm({
     defaultValues: {
@@ -124,9 +126,9 @@ export function ApplicationModal() {
   });
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
+    <Dialog onOpenChange={setOpen} open={open}>
       <DialogTrigger asChild>
-        <Button size="lg" className="w-full sm:w-auto">
+        <Button className="w-full sm:w-auto" size="lg">
           Ansök om tjänsten
         </Button>
       </DialogTrigger>
@@ -140,12 +142,12 @@ export function ApplicationModal() {
         </DialogHeader>
 
         <form
+          className="space-y-6"
           onSubmit={(e) => {
             e.preventDefault();
             e.stopPropagation();
             form.handleSubmit();
           }}
-          className="space-y-6 "
         >
           <form.Field
             name="name"
@@ -164,13 +166,13 @@ export function ApplicationModal() {
                   Namn <span className="text-destructive">*</span>
                 </Label>
                 <Input
+                  aria-invalid={!field.state.meta.isValid}
                   id={field.name}
                   name={field.name}
-                  value={field.state.value}
                   onBlur={field.handleBlur}
                   onChange={(e) => field.handleChange(e.target.value)}
                   placeholder="Anna Andersson"
-                  aria-invalid={!field.state.meta.isValid}
+                  value={field.state.value}
                 />
                 <FieldError errors={field.state.meta.errors} />
               </div>
@@ -194,14 +196,14 @@ export function ApplicationModal() {
                   E-postadress <span className="text-destructive">*</span>
                 </Label>
                 <Input
+                  aria-invalid={!field.state.meta.isValid}
                   id={field.name}
                   name={field.name}
-                  type="email"
-                  value={field.state.value}
                   onBlur={field.handleBlur}
                   onChange={(e) => field.handleChange(e.target.value)}
                   placeholder="anna@example.com"
-                  aria-invalid={!field.state.meta.isValid}
+                  type="email"
+                  value={field.state.value}
                 />
                 <FieldError errors={field.state.meta.errors} />
               </div>
@@ -225,14 +227,14 @@ export function ApplicationModal() {
                   Telefonnummer <span className="text-destructive">*</span>
                 </Label>
                 <Input
+                  aria-invalid={!field.state.meta.isValid}
                   id={field.name}
                   name={field.name}
-                  type="tel"
-                  value={field.state.value}
                   onBlur={field.handleBlur}
                   onChange={(e) => field.handleChange(e.target.value)}
                   placeholder="070-123 45 67"
-                  aria-invalid={!field.state.meta.isValid}
+                  type="tel"
+                  value={field.state.value}
                 />
                 <FieldError errors={field.state.meta.errors} />
               </div>
@@ -248,10 +250,10 @@ export function ApplicationModal() {
                 }
                 if (value.length > FILE_UPLOAD.MAX_FILES) {
                   return VALIDATION_MESSAGES.TOO_MANY_FILES(
-                    FILE_UPLOAD.MAX_FILES,
+                    FILE_UPLOAD.MAX_FILES
                   );
                 }
-                return undefined;
+                return;
               },
             }}
           >
@@ -261,15 +263,15 @@ export function ApplicationModal() {
                   Ladda upp filer <span className="text-destructive">*</span>
                 </Label>
                 <FileUpload
-                  value={field.state.value}
-                  onValueChange={field.handleChange}
                   accept={`${FILE_UPLOAD.ALLOWED_EXTENSIONS},${FILE_UPLOAD.ALLOWED_MIME_TYPES.join(',')}`}
                   maxFiles={FILE_UPLOAD.MAX_FILES}
                   maxSize={FILE_UPLOAD.MAX_FILE_SIZE}
+                  multiple
                   onFileReject={(_, message) => {
                     toast.error(message);
                   }}
-                  multiple
+                  onValueChange={field.handleChange}
+                  value={field.state.value}
                 >
                   <FileUploadDropzone>
                     <div className="flex flex-col items-center gap-1">
@@ -286,10 +288,10 @@ export function ApplicationModal() {
                     </div>
                     <FileUploadTrigger asChild>
                       <Button
+                        className="mt-2 w-fit"
+                        size="sm"
                         type="button"
                         variant="outline"
-                        size="sm"
-                        className="mt-2 w-fit"
                       >
                         Välj filer
                       </Button>
@@ -306,10 +308,10 @@ export function ApplicationModal() {
                           <FileUploadItemMetadata />
                           <FileUploadItemDelete asChild>
                             <Button
+                              className="size-7"
+                              size="icon"
                               type="button"
                               variant="ghost"
-                              size="icon"
-                              className="size-7"
                             >
                               <X className="size-4" />
                               <span className="sr-only">Ta bort</span>
@@ -338,14 +340,14 @@ export function ApplicationModal() {
               {([canSubmit, isSubmitting]) => (
                 <>
                   <Button
+                    disabled={isSubmitting}
+                    onClick={() => setOpen(false)}
                     type="button"
                     variant="outline"
-                    onClick={() => setOpen(false)}
-                    disabled={isSubmitting}
                   >
                     Avbryt
                   </Button>
-                  <Button type="submit" disabled={!canSubmit || isSubmitting}>
+                  <Button disabled={!canSubmit || isSubmitting} type="submit">
                     {isSubmitting ? 'Skickar...' : 'Skicka ansökan'}
                   </Button>
                 </>

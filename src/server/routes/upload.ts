@@ -82,14 +82,14 @@ async function validateFileType(file: File): Promise<JsonApiError | null> {
   // Check MIME type first
   if (
     !FILE_UPLOAD.ALLOWED_MIME_TYPES.includes(
-      file.type as (typeof FILE_UPLOAD.ALLOWED_MIME_TYPES)[number],
+      file.type as (typeof FILE_UPLOAD.ALLOWED_MIME_TYPES)[number]
     )
   ) {
     return createValidationError(
       VALIDATION_MESSAGES.INVALID_FILE_TYPE(
         file.name,
-        FILE_UPLOAD.ALLOWED_TYPES_DESCRIPTION,
-      ),
+        FILE_UPLOAD.ALLOWED_TYPES_DESCRIPTION
+      )
     );
   }
 
@@ -97,7 +97,7 @@ async function validateFileType(file: File): Promise<JsonApiError | null> {
   const isValidSignature = await validateFileSignature(file);
   if (!isValidSignature) {
     return createValidationError(
-      `Filens innehåll matchar inte dess filtyp: ${file.name}`,
+      `Filens innehåll matchar inte dess filtyp: ${file.name}`
     );
   }
 
@@ -109,8 +109,8 @@ function validateFileSize(file: File): JsonApiError | null {
     return createValidationError(
       VALIDATION_MESSAGES.FILE_TOO_LARGE(
         file.name,
-        FILE_UPLOAD.MAX_FILE_SIZE_DISPLAY,
-      ),
+        FILE_UPLOAD.MAX_FILE_SIZE_DISPLAY
+      )
     );
   }
   return null;
@@ -130,10 +130,14 @@ async function validateFiles(files: File[]): Promise<JsonApiError[]> {
     }
 
     const typeError = await validateFileType(file);
-    if (typeError) errors.push(typeError);
+    if (typeError) {
+      errors.push(typeError);
+    }
 
     const sizeError = validateFileSize(file);
-    if (sizeError) errors.push(sizeError);
+    if (sizeError) {
+      errors.push(sizeError);
+    }
   }
 
   return errors;
@@ -142,7 +146,7 @@ async function validateFiles(files: File[]): Promise<JsonApiError[]> {
 async function uploadFileToR2(
   bucket: R2Bucket,
   file: File,
-  folderName: string,
+  folderName: string
 ): Promise<void> {
   const fileKey = `${folderName}/${file.name}`;
   await bucket.put(fileKey, file.stream(), {
@@ -195,9 +199,9 @@ upload.post('/', zValidator('form', JobApplicationSchema), async (c) => {
                 uploadError instanceof Error
                   ? uploadError.message
                   : 'Unknown error',
-            }),
+            })
           ),
-          500,
+          500
         );
       }
     }
@@ -217,9 +221,9 @@ upload.post('/', zValidator('form', JobApplicationSchema), async (c) => {
         },
         {
           message: SUCCESS_MESSAGES.APPLICATION_UPLOADED,
-        },
+        }
       ),
-      201,
+      201
     );
   } catch (error) {
     console.error('Upload error:', error);
@@ -227,9 +231,9 @@ upload.post('/', zValidator('form', JobApplicationSchema), async (c) => {
       createErrorResponse(
         createInternalError(VALIDATION_MESSAGES.INTERNAL_ERROR, {
           message: error instanceof Error ? error.message : 'Unknown error',
-        }),
+        })
       ),
-      500,
+      500
     );
   }
 });
