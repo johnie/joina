@@ -1,3 +1,4 @@
+// biome-ignore-all lint: file-header: This is a UI component file for file uploads
 import { File as FileIcon } from 'lucide-react';
 import {
   type ChangeEvent,
@@ -77,9 +78,18 @@ export function FileUploadDropzone({
   children,
   ...props
 }: FileUploadDropzoneProps) {
-  const { value, onValueChange, accept, maxFiles, maxSize, onFileReject } =
-    useFileUpload();
+  const {
+    value,
+    onValueChange,
+    accept,
+    maxFiles,
+    maxSize,
+    multiple,
+    onFileReject,
+  } = useFileUpload();
   const [isDragging, setIsDragging] = useState(false);
+  const inputRef = useRef<HTMLInputElement>(null);
+  const inputId = useId();
 
   const validateAndAddFiles = async (newFiles: File[]) => {
     const result = await validateFiles({
@@ -99,8 +109,17 @@ export function FileUploadDropzone({
     }
   };
 
+  const handleFileChange = (e: ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(e.target.files || []);
+    if (files.length > 0) {
+      validateAndAddFiles(files);
+    }
+    e.target.value = '';
+  };
+
   const handleDrop = (e: DragEvent<HTMLDivElement>) => {
     e.preventDefault();
+    e.stopPropagation();
     setIsDragging(false);
 
     const files = Array.from(e.dataTransfer.files);
@@ -109,35 +128,76 @@ export function FileUploadDropzone({
 
   const handleDragOver = (e: DragEvent<HTMLDivElement>) => {
     e.preventDefault();
+    e.stopPropagation();
     setIsDragging(true);
   };
 
   const handleDragLeave = (e: DragEvent<HTMLDivElement>) => {
     e.preventDefault();
+    e.stopPropagation();
+    // Only cancel dragging if we are leaving the dropzone entirely
+    if (e.currentTarget.contains(e.relatedTarget as Node)) {
+      return;
+    }
     setIsDragging(false);
   };
 
+  const handleClick = (e: MouseEvent<HTMLDivElement>) => {
+    // If the click came from the file input itself, stop (prevents loops)
+    if ((e.target as HTMLElement).tagName === 'INPUT') {
+      return;
+    }
+
+    // If the user clicked a button inside the dropzone (like a "Remove" button)
+    // we usually don't want to open the file picker.
+    if ((e.target as HTMLElement).closest('button')) {
+      return;
+    }
+
+    e.preventDefault();
+    inputRef.current?.click();
+  };
+
+  const handleKeyDown = (e: KeyboardEvent<HTMLDivElement>) => {
+    // Ignore if typing in a text input inside the dropzone
+    if ((e.target as HTMLElement).tagName === 'INPUT') {
+      return;
+    }
+
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      inputRef.current?.click();
+    }
+  };
+
   return (
-    // biome-ignore lint/a11y/noNoninteractiveElementInteractions: Drag-and-drop zone requires event handlers
-    // biome-ignore lint/a11y/noStaticElementInteractions: Drag-and-drop zone is inherently interactive
     <div
-      aria-describedby="file-upload-instructions"
+      aria-label="File upload area - click or drag and drop files here"
       className={cn(
-        'flex min-h-[120px] flex-col items-center justify-center gap-2 rounded-lg border-2 border-dashed px-6 py-4 transition-colors',
+        'flex min-h-[120px] w-full cursor-pointer flex-col items-center justify-center gap-2 rounded-lg border-2 border-dashed px-6 py-4 text-left transition-colors',
         isDragging
           ? 'border-primary bg-primary/5'
           : 'border-muted-foreground/25',
         className
       )}
+      onClick={handleClick}
       onDragLeave={handleDragLeave}
       onDragOver={handleDragOver}
       onDrop={handleDrop}
+      onKeyDown={handleKeyDown}
+      tabIndex={0}
       {...props}
     >
-      <span className="sr-only" id="file-upload-instructions">
-        Filuppladdningsområde
-      </span>
       {children}
+      <input
+        accept={accept}
+        className="sr-only"
+        id={inputId}
+        multiple={multiple}
+        onChange={handleFileChange}
+        ref={inputRef}
+        type="file"
+      />
     </div>
   );
 }
