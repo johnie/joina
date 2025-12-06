@@ -6,7 +6,7 @@ export function ShaStamp() {
   const SHA_URL = GIT_SHA_URL;
   return (
     <div className="mt-4 text-center text-muted-foreground text-xs">
-      {SHA && (
+      {SHA ? (
         <span>
           <a
             className="inline-flex items-center gap-1 hover:underline"
@@ -18,7 +18,7 @@ export function ShaStamp() {
             {SHA}
           </a>
         </span>
-      )}
+      ) : null}
     </div>
   );
 }
