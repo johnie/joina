@@ -8,7 +8,6 @@
     "files": {
         "ignoreUnknown": false,
         "includes": [
-            "**",
             "!**/src/index.css",
             "!**/dist",
             "!**/.content-collections"

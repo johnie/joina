@@ -5,6 +5,7 @@ import { FaqAccordion } from '@/components/faq-accordion';
 import { GodOmsorgLogo } from '@/components/god-omsorg';
 import { JobMetaCard } from '@/components/job-meta';
 import { MDXImage } from '@/components/mdx/image';
+import { MDXLink } from '@/components/mdx/link';
 import { ShaStamp } from '@/components/sha';
 
 const JOB_METADATA = [
@@ -22,6 +23,7 @@ const COMPANY_INFO = {
 
 const MDX_COMPONENTS = {
   FaqAccordion,
+  a: MDXLink,
   img: MDXImage,
 };
 
@@ -35,7 +37,7 @@ function App() {
   }
 
   return (
-    <main>
+    <main id="main-content">
       <article className="prose prose-stone dark:prose-invert max-w-full prose-ul:list-disc prose-headings:font-heading prose-a:text-teal-500 prose-headings:text-amber-600 text-sm prose-ol:leading-tight prose-p:leading-7 prose-ul:leading-tight prose-a:underline-offset-4 marker:text-teal-500">
         <p className="flex items-center justify-center gap-2 text-center text-muted-foreground text-sm">
           <span>Personlig Assistans</span>
@@ -50,7 +52,7 @@ function App() {
         <JobMetaCard items={JOB_METADATA} />
       </article>
       <a
-        aria-label={COMPANY_INFO.name}
+        aria-label={`${COMPANY_INFO.name} (öppnas i nytt fönster)`}
         href={COMPANY_INFO.url}
         rel="noopener noreferrer"
         target="_blank"

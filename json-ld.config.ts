@@ -1,10 +1,16 @@
-import type { Thing, WithContext } from 'schema-dts';
+import type { JobPosting, WebSite, WithContext } from 'schema-dts';
 
 /**
  * JSON-LD structured data configuration
  * This file contains all structured data schemas that will be injected into index.html
  */
-export const jsonLdData: WithContext<Thing>[] = [
+export const jsonLdData: WithContext<JobPosting | WebSite>[] = [
+  {
+    '@context': 'https://schema.org',
+    '@type': 'WebSite',
+    name: 'Johnie söker personlig assistent',
+    url: 'https://joina.johnie.se',
+  },
   {
     '@context': 'https://schema.org',
     '@type': 'JobPosting',
@@ -38,6 +44,8 @@ export const jsonLdData: WithContext<Thing>[] = [
       currency: 'SEK',
       value: {
         '@type': 'QuantitativeValue',
+        minValue: 150,
+        maxValue: 180,
         unitText: 'HOUR',
       },
     },

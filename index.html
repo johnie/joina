@@ -10,7 +10,7 @@
 		<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 		<!-- Preconnect to external domains for performance -->
-		<link rel="preconnect" href="https://ik.imagekit.io">
+		<link rel="preconnect" href="https://ik.imagekit.io" crossorigin>
 		<link rel="dns-prefetch" href="https://ik.imagekit.io">
 		<link rel="preconnect" href="https://static.cloudflareinsights.com">
 
@@ -66,6 +66,7 @@
 		<!-- Additional SEO -->
 		<link rel="canonical" href="https://joina.johnie.se">
 		<link rel="alternate" hreflang="sv" href="https://joina.johnie.se">
+		<link rel="alternate" hreflang="x-default" href="https://joina.johnie.se">
 		<meta name="theme-color" content="#000000">
 
 		<!-- Cloudflare Web Analytics -->
@@ -75,8 +76,11 @@
 			data-cf-beacon='{"token": "970634cf7d284d23a3b5390a1398783d"}'
 		></script>
 		<!-- End Cloudflare Web Analytics -->
+		<!-- Module preload for faster initial load -->
+		<link rel="modulepreload" href="/src/main.tsx">
 	</head>
 	<body class="antialiased dark font-mono">
+		<a href="#main-content" class="skip-link">Hoppa till huvudinnehåll</a>
 		<div class="w-full max-w-2xl px-4 py-16 mx-auto">
 			<div id="root"></div>
 		</div>
