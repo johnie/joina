@@ -77,7 +77,7 @@ function DialogContent({
             data-slot="dialog-close"
           >
             <XIcon />
-            <span className="sr-only">Close</span>
+            <span className="sr-only">Stäng</span>
           </DialogPrimitiveClose>
         ) : null}
       </DialogPrimitiveContent>
