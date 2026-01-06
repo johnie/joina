@@ -16,6 +16,7 @@ export function ShaStamp() {
           >
             <GitBranch className="h-3 w-3" />
             {SHA}
+            <span className="sr-only">(öppnas i nytt fönster)</span>
           </a>
         </span>
       ) : null}
