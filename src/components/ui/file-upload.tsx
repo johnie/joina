@@ -172,7 +172,7 @@ export function FileUploadDropzone({
 
   return (
     <div
-      aria-label="File upload area - click or drag and drop files here"
+      aria-label="Filuppladdningsområde - klicka eller dra och släpp filer här"
       className={cn(
         'flex min-h-[120px] w-full cursor-pointer flex-col items-center justify-center gap-2 rounded-lg border-2 border-dashed px-6 py-4 text-left transition-colors',
         isDragging
@@ -315,7 +315,13 @@ export function FileUploadList({
   ...props
 }: FileUploadListProps) {
   return (
-    <div className={cn('w-full min-w-0 space-y-2', className)} {...props}>
+    <div
+      aria-label="Uppladdade filer"
+      aria-live="polite"
+      className={cn('w-full min-w-0 space-y-2', className)}
+      role="list"
+      {...props}
+    >
       {children}
     </div>
   );
