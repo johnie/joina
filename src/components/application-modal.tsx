@@ -80,7 +80,13 @@ const applicationSchema = z.object({
     ),
 });
 
-function FieldError({ errors }: { errors: (string | undefined)[] }) {
+function FieldError({
+  errors,
+  id,
+}: {
+  errors: (string | undefined)[];
+  id?: string;
+}) {
   const errorMessages = errors.filter(
     (error): error is string => error !== undefined
   );
@@ -88,7 +94,7 @@ function FieldError({ errors }: { errors: (string | undefined)[] }) {
     return null;
   }
   return (
-    <p className="font-medium text-destructive text-sm" role="alert">
+    <p className="font-medium text-destructive text-sm" id={id} role="alert">
       {errorMessages[0]}
     </p>
   );
@@ -166,6 +172,7 @@ export function ApplicationModal() {
                   Namn <span className="text-destructive">*</span>
                 </Label>
                 <Input
+                  aria-describedby={`${field.name}-error`}
                   aria-invalid={!field.state.meta.isValid}
                   id={field.name}
                   name={field.name}
@@ -174,7 +181,10 @@ export function ApplicationModal() {
                   placeholder="Anna Andersson"
                   value={field.state.value}
                 />
-                <FieldError errors={field.state.meta.errors} />
+                <FieldError
+                  errors={field.state.meta.errors}
+                  id={`${field.name}-error`}
+                />
               </div>
             )}
           </form.Field>
@@ -196,6 +206,7 @@ export function ApplicationModal() {
                   E-postadress <span className="text-destructive">*</span>
                 </Label>
                 <Input
+                  aria-describedby={`${field.name}-error`}
                   aria-invalid={!field.state.meta.isValid}
                   id={field.name}
                   name={field.name}
@@ -205,7 +216,10 @@ export function ApplicationModal() {
                   type="email"
                   value={field.state.value}
                 />
-                <FieldError errors={field.state.meta.errors} />
+                <FieldError
+                  errors={field.state.meta.errors}
+                  id={`${field.name}-error`}
+                />
               </div>
             )}
           </form.Field>
@@ -227,6 +241,7 @@ export function ApplicationModal() {
                   Telefonnummer <span className="text-destructive">*</span>
                 </Label>
                 <Input
+                  aria-describedby={`${field.name}-error`}
                   aria-invalid={!field.state.meta.isValid}
                   id={field.name}
                   name={field.name}
@@ -236,7 +251,10 @@ export function ApplicationModal() {
                   type="tel"
                   value={field.state.value}
                 />
-                <FieldError errors={field.state.meta.errors} />
+                <FieldError
+                  errors={field.state.meta.errors}
+                  id={`${field.name}-error`}
+                />
               </div>
             )}
           </form.Field>
@@ -347,7 +365,11 @@ export function ApplicationModal() {
                   >
                     Avbryt
                   </Button>
-                  <Button disabled={!canSubmit || isSubmitting} type="submit">
+                  <Button
+                    aria-busy={isSubmitting}
+                    disabled={!canSubmit || isSubmitting}
+                    type="submit"
+                  >
                     {isSubmitting ? 'Skickar...' : 'Skicka ansökan'}
                   </Button>
                 </>
