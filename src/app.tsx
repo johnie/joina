@@ -7,11 +7,15 @@ import { JobMetaCard } from '@/components/job-meta';
 import { MDXImage } from '@/components/mdx/image';
 import { MDXLink } from '@/components/mdx/link';
 import { ShaStamp } from '@/components/sha';
+import { APPLICATION_DEADLINE } from './constants/application';
 
 const JOB_METADATA = [
   { label: 'Typ av tjänst', value: '75-100%' },
   { label: 'Platser', value: 'Sigtuna/Stockholm' },
-  { label: 'Sist ansökningsdag', value: '2026-01-31' },
+  {
+    label: 'Sist ansökningsdag',
+    value: new Date(APPLICATION_DEADLINE).toLocaleDateString('sv-SE'),
+  },
 ];
 
 const COMPANY_INFO = {

@@ -1,17 +1,17 @@
 import { FILE_UPLOAD } from '@/config';
 
-export type FileValidationResult = {
+export interface FileValidationResult {
   validFiles: File[];
   errors: Array<{ file: File; message: string }>;
-};
+}
 
-export type FileValidationOptions = {
+export interface FileValidationOptions {
   currentFiles: File[];
   newFiles: File[];
   accept?: string;
   maxFiles?: number;
   maxSize?: number;
-};
+}
 
 /**
  * Validates file signature (magic numbers) to prevent file type spoofing

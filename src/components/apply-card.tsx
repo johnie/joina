@@ -9,7 +9,10 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
-import { APPLICATION_DEADLINE } from '@/constants/application';
+import {
+  APPLICATION_DEADLINE,
+  APPLICATION_FORM_ENABLED,
+} from '@/constants/application';
 
 export function ApplyCard() {
   return (
@@ -20,8 +23,9 @@ export function ApplyCard() {
             Så här ansöker du
           </CardTitle>
           <CardDescription className="text-stone-700 dark:text-stone-300">
-            Är du intresserad av tjänsten? Ansök via vårt formulär eller skicka
-            din ansökan via e-post!
+            {APPLICATION_FORM_ENABLED
+              ? 'Är du intresserad av tjänsten? Ansök via vårt formulär eller skicka din ansökan via e-post!'
+              : 'Är du intresserad av tjänsten? Skicka din ansökan via e-post!'}
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
@@ -44,7 +48,9 @@ export function ApplyCard() {
           </div>
           <div className="rounded-lg border border-stone-200 bg-white/50 p-4 dark:border-stone-700 dark:bg-stone-900/50">
             <p className="mb-1 font-medium text-sm text-stone-900 dark:text-stone-100">
-              Eller skicka din ansökan till:
+              {APPLICATION_FORM_ENABLED
+                ? 'Eller skicka din ansökan till:'
+                : 'Skicka din ansökan till:'}
             </p>
             <a
               className="font-semibold text-lg text-teal-600 hover:underline dark:text-teal-400"
@@ -60,7 +66,7 @@ export function ApplyCard() {
           </p>
         </CardContent>
         <CardFooter className="flex flex-col gap-2 sm:flex-row">
-          <ApplicationModal />
+          {APPLICATION_FORM_ENABLED && <ApplicationModal />}
           <Button
             asChild
             className="w-full border-teal-600 text-teal-600 hover:bg-teal-50 sm:w-auto dark:border-teal-400 dark:text-teal-400 dark:hover:bg-teal-950"

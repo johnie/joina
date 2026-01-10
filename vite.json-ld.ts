@@ -1,7 +1,7 @@
 import type { Thing, WithContext } from 'schema-dts';
 import type { Plugin } from 'vite';
 
-export type JsonLdPluginOptions = {
+export interface JsonLdPluginOptions {
   /**
    * JSON-LD structured data to inject
    * Can be a single schema or an array of schemas
@@ -17,7 +17,7 @@ export type JsonLdPluginOptions = {
    * @default true in production, false in development
    */
   minify?: boolean;
-};
+}
 
 /**
  * Vite plugin to inject JSON-LD structured data into index.html

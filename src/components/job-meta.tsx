@@ -6,17 +6,17 @@ import { cn } from '@/lib/utils';
  * A reusable metadata card that mimics a two column facts box.
  * Pass any set of label and value pairs with optional title.
  */
-export type MetaItem = {
+export interface MetaItem {
   label: React.ReactNode;
   value: React.ReactNode;
-};
+}
 
-export type JobMetaCardProps = {
+export interface JobMetaCardProps {
   /** Pairs shown in order, left column are labels, right column are values */
   items: MetaItem[];
   /** Extra classes to style the wrapper */
   className?: string;
-};
+}
 
 export function JobMetaCard({ items, className }: JobMetaCardProps) {
   return (

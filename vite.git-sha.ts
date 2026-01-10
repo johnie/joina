@@ -2,9 +2,9 @@ import { execSync } from 'node:child_process';
 import type { Plugin } from 'vite';
 import pkg from './package.json';
 
-export type GitShaPluginOptions = {
+export interface GitShaPluginOptions {
   branchName?: string;
-};
+}
 
 const GIT_PREFIX_REGEX = /^git\+/;
 const GIT_SUFFIX_REGEX = /\.git$/;
