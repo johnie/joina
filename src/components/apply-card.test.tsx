@@ -2,7 +2,7 @@ import { render, screen } from '@testing-library/react';
 import { describe, expect, it } from 'vitest';
 import { ApplyCard } from './apply-card';
 
-const APPLICATION_DEADLINE_REGEX = /31 januari 2026/i;
+const APPLICATION_DEADLINE_REGEX = /28 februari 2026/i;
 const PERSONAL_LETTER_REGEX = /Ett personligt brev/i;
 
 describe('ApplyCard', () => {
@@ -24,13 +24,10 @@ describe('ApplyCard', () => {
     expect(screen.getByText(APPLICATION_DEADLINE_REGEX)).toBeInTheDocument();
   });
 
-  it('includes both application methods', () => {
+  it('includes email application method', () => {
     render(<ApplyCard />);
 
-    // Modal button
-    expect(screen.getByText('Ansök om tjänsten')).toBeInTheDocument();
-
-    // Email button
+    // Email button (form is currently disabled)
     expect(screen.getByText('Skicka via e-post')).toBeInTheDocument();
   });
 
