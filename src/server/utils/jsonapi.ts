@@ -1,7 +1,7 @@
 /**
  * JSON API Error Object
  */
-export type JsonApiError = {
+export interface JsonApiError {
   /** HTTP status code as a string */
   status: string;
   /** Application-specific error code */
@@ -21,28 +21,28 @@ export type JsonApiError = {
   };
   /** Non-standard meta-information about the error */
   meta?: Record<string, unknown>;
-};
+}
 
 /**
  * JSON API Error Response
  */
-export type JsonApiErrorResponse = {
+export interface JsonApiErrorResponse {
   errors: JsonApiError[];
   jsonapi?: {
     version: string;
   };
-};
+}
 
 /**
  * JSON API Success Response with data
  */
-export type JsonApiSuccessResponse<T = unknown> = {
+export interface JsonApiSuccessResponse<T = unknown> {
   data: T;
   jsonapi?: {
     version: string;
   };
   meta?: Record<string, unknown>;
-};
+}
 
 /**
  * Create a JSON API error response

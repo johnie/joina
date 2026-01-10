@@ -1,18 +1,18 @@
 import type { Context, MiddlewareHandler } from 'hono';
 import { createErrorResponse, createValidationError } from '../utils/jsonapi';
 
-type RateLimitStore = {
+interface RateLimitStore {
   [key: string]: {
     count: number;
     resetAt: number;
   };
-};
+}
 
-type RateLimiterOptions = {
+interface RateLimiterOptions {
   windowMs: number; // Time window in milliseconds
   limit: number; // Max requests per window
   keyGenerator: (c: Context) => string; // Function to generate unique key per client
-};
+}
 
 // In-memory store for rate limiting
 // In production, consider using Durable Objects or KV for persistence
