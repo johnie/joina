@@ -1,4 +1,4 @@
-import { Calendar, Mail } from 'lucide-react';
+import { Calendar, CheckCircle, Mail, PauseCircle } from 'lucide-react';
 import { ApplicationModal } from '@/components/application-modal';
 import { Button } from '@/components/ui/button';
 import {
@@ -10,11 +10,13 @@ import {
   CardTitle,
 } from '@/components/ui/card';
 import {
+  APPLICATION_CLOSED_MESSAGE,
   APPLICATION_DEADLINE,
-  APPLICATION_FORM_ENABLED,
+  APPLICATION_PAUSED_MESSAGE,
+  APPLICATION_STATUS,
 } from '@/constants/application';
 
-export function ApplyCard() {
+function OpenApplicationCard() {
   return (
     <>
       <Card className="not-prose my-8">
@@ -23,9 +25,7 @@ export function ApplyCard() {
             Så här ansöker du
           </CardTitle>
           <CardDescription className="text-stone-700 dark:text-stone-300">
-            {APPLICATION_FORM_ENABLED
-              ? 'Är du intresserad av tjänsten? Ansök via vårt formulär eller skicka din ansökan via e-post!'
-              : 'Är du intresserad av tjänsten? Skicka din ansökan via e-post!'}
+            Är du intresserad av tjänsten? Skicka din ansökan via e-post!
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
@@ -48,9 +48,7 @@ export function ApplyCard() {
           </div>
           <div className="rounded-lg border border-stone-200 bg-white/50 p-4 dark:border-stone-700 dark:bg-stone-900/50">
             <p className="mb-1 font-medium text-sm text-stone-900 dark:text-stone-100">
-              {APPLICATION_FORM_ENABLED
-                ? 'Eller skicka din ansökan till:'
-                : 'Skicka din ansökan till:'}
+              Skicka din ansökan till:
             </p>
             <a
               className="font-semibold text-lg text-teal-600 hover:underline dark:text-teal-400"
@@ -66,7 +64,7 @@ export function ApplyCard() {
           </p>
         </CardContent>
         <CardFooter className="flex flex-col gap-2 sm:flex-row">
-          {APPLICATION_FORM_ENABLED && <ApplicationModal />}
+          <ApplicationModal />
           <Button
             asChild
             className="w-full border-teal-600 text-teal-600 hover:bg-teal-50 sm:w-auto dark:border-teal-400 dark:text-teal-400 dark:hover:bg-teal-950"
@@ -93,4 +91,83 @@ export function ApplyCard() {
       </div>
     </>
   );
+}
+
+function PausedApplicationCard() {
+  return (
+    <>
+      <Card className="not-prose my-8">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2 font-heading text-amber-600 text-xl">
+            <PauseCircle className="h-6 w-6" />
+            Ansökningar pausade
+          </CardTitle>
+          <CardDescription className="text-stone-700 dark:text-stone-300">
+            {APPLICATION_PAUSED_MESSAGE}
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="rounded-lg border border-stone-200 bg-white/50 p-4 dark:border-stone-700 dark:bg-stone-900/50">
+            <p className="mb-1 font-medium text-sm text-stone-900 dark:text-stone-100">
+              Har du frågor? Kontakta oss:
+            </p>
+            <a
+              className="font-semibold text-lg text-teal-600 hover:underline dark:text-teal-400"
+              href="mailto:jobb@johnie.se?subject=Fråga om tjänsten: Personlig Assistent"
+            >
+              jobb@johnie.se
+            </a>
+          </div>
+        </CardContent>
+      </Card>
+      <div className="not-prose mb-8 flex items-center gap-3 rounded-lg border border-amber-900 bg-amber-950/30 p-4">
+        <PauseCircle className="h-5 w-5 text-amber-400" />
+        <div>
+          <p className="font-medium text-sm text-stone-900 dark:text-stone-100">
+            Status
+          </p>
+          <p className="font-semibold text-amber-400 text-lg">Pausad</p>
+        </div>
+      </div>
+    </>
+  );
+}
+
+function ClosedApplicationCard() {
+  return (
+    <>
+      <Card className="not-prose my-8">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2 font-heading text-amber-600 text-xl">
+            <CheckCircle className="h-6 w-6" />
+            Tjänsten tillsatt
+          </CardTitle>
+          <CardDescription className="text-stone-700 dark:text-stone-300">
+            {APPLICATION_CLOSED_MESSAGE}
+          </CardDescription>
+        </CardHeader>
+      </Card>
+      <div className="not-prose mb-8 flex items-center gap-3 rounded-lg border border-amber-900 bg-amber-950/30 p-4">
+        <CheckCircle className="h-5 w-5 text-amber-400" />
+        <div>
+          <p className="font-medium text-sm text-stone-900 dark:text-stone-100">
+            Status
+          </p>
+          <p className="font-semibold text-amber-400 text-lg">Tillsatt</p>
+        </div>
+      </div>
+    </>
+  );
+}
+
+export function ApplyCard() {
+  if (APPLICATION_STATUS === 'paused') {
+    return <PausedApplicationCard />;
+  }
+
+  if (APPLICATION_STATUS === 'closed') {
+    return <ClosedApplicationCard />;
+  }
+
+  return <OpenApplicationCard />;
 }
