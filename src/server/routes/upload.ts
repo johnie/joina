@@ -4,6 +4,7 @@ import { z } from 'zod';
 import { FILE_UPLOAD, SUCCESS_MESSAGES, VALIDATION_MESSAGES } from '@/config';
 import { APPLICATION_STATUS } from '@/constants/application';
 import type { Bindings } from '../types/bindings';
+import { createApplicationEmail, logEmailPayload } from '../utils/email';
 import {
   createErrorResponse,
   createInternalError,
@@ -12,6 +13,9 @@ import {
   type JsonApiError,
 } from '../utils/jsonapi';
 import { slugifyEmail } from '../utils/slugify';
+
+const isDev =
+  process.env.NODE_ENV === 'development' || process.env.WRANGLER_DEV === 'true';
 
 const upload = new Hono<{ Bindings: Bindings }>();
 
@@ -213,6 +217,28 @@ upload.post('/', zValidator('form', JobApplicationSchema), async (c) => {
           ),
           500
         );
+      }
+    }
+
+    // Send email notification
+    const emailData = {
+      name,
+      email,
+      phone,
+      fileCount: files.length,
+      submittedAt: applicationData.submittedAt,
+      folderId: folderName,
+    };
+
+    if (isDev) {
+      logEmailPayload(emailData);
+    } else {
+      try {
+        const emailMessage = createApplicationEmail(emailData);
+        await c.env.EMAIL.send(emailMessage);
+      } catch (emailError) {
+        console.error('Email notification failed:', emailError);
+        // Don't fail upload on email error
       }
     }
 
