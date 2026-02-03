@@ -15,6 +15,12 @@
             "preview_bucket_name": "joina-bucket-preview"
         }
     ],
+    "send_email": [
+        {
+            "name": "EMAIL",
+            "destination_address": "jobb@johnie.se"
+        }
+    ],
     "observability": {
         "logs": {
             "enabled": true,

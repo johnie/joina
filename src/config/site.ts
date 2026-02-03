@@ -22,3 +22,9 @@ export const GITHUB = {
   REPO: 'joina',
   URL: 'https://github.com/johnie/joina',
 } as const;
+
+export const EMAIL = {
+  FROM: 'noreply@johnie.se',
+  FROM_NAME: 'Joina',
+  TO: 'jobb@johnie.se',
+} as const;
