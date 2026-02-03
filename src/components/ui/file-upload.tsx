@@ -1,5 +1,6 @@
 // biome-ignore-all lint: file-header: This is a UI component file for file uploads
-import { File as FileIcon } from 'lucide-react';
+import { File01Icon } from '@hugeicons/core-free-icons';
+import { HugeiconsIcon } from '@hugeicons/react';
 import {
   type ChangeEvent,
   cloneElement,
@@ -393,7 +394,7 @@ export function FileUploadItemPreview({
       )}
       {...props}
     >
-      <FileIcon className="size-5" />
+      <HugeiconsIcon icon={File01Icon} size={20} />
     </div>
   );
 }

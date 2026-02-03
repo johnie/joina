@@ -1,5 +1,6 @@
+import { Cancel01Icon, Upload01Icon } from '@hugeicons/core-free-icons';
+import { HugeiconsIcon } from '@hugeicons/react';
 import { useForm } from '@tanstack/react-form';
-import { Upload, X } from 'lucide-react';
 import { useState } from 'react';
 import { toast } from 'sonner';
 import { z } from 'zod';
@@ -294,7 +295,11 @@ export function ApplicationModal() {
                   <FileUploadDropzone>
                     <div className="flex flex-col items-center gap-1">
                       <div className="flex items-center justify-center rounded-full border p-2.5">
-                        <Upload className="size-6 text-muted-foreground" />
+                        <HugeiconsIcon
+                          className="text-muted-foreground"
+                          icon={Upload01Icon}
+                          size={24}
+                        />
                       </div>
                       <p className="font-medium text-sm">
                         Dra och släpp filer här
@@ -331,7 +336,7 @@ export function ApplicationModal() {
                               type="button"
                               variant="ghost"
                             >
-                              <X className="size-4" />
+                              <HugeiconsIcon icon={Cancel01Icon} size={16} />
                               <span className="sr-only">Ta bort</span>
                             </Button>
                           </FileUploadItemDelete>

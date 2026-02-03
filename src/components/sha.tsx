@@ -1,4 +1,5 @@
-import { GitBranch } from 'lucide-react';
+import { GitBranchIcon } from '@hugeicons/core-free-icons';
+import { HugeiconsIcon } from '@hugeicons/react';
 import { GIT_SHA, GIT_SHA_URL } from '@/config';
 
 export function ShaStamp() {
@@ -14,7 +15,7 @@ export function ShaStamp() {
             rel="noopener noreferrer"
             target="_blank"
           >
-            <GitBranch className="h-3 w-3" />
+            <HugeiconsIcon icon={GitBranchIcon} size={12} />
             {SHA}
             <span className="sr-only">(öppnas i nytt fönster)</span>
           </a>
