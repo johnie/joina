@@ -1,5 +1,4 @@
 import { EmailMessage } from 'cloudflare:email';
-import { createMimeMessage } from 'mimetext';
 import { EMAIL } from '@/config';
 
 interface ApplicationEmailData {
@@ -93,27 +92,65 @@ function escapeHtml(str: string): string {
     .replace(/'/g, '&#039;');
 }
 
+function isAsciiOnly(str: string): boolean {
+  for (let i = 0; i < str.length; i++) {
+    if (str.charCodeAt(i) > 127) {
+      return false;
+    }
+  }
+  return true;
+}
+
+function encodeRFC2047(str: string): string {
+  // Encode non-ASCII characters in headers using RFC 2047
+  if (isAsciiOnly(str)) {
+    return str;
+  }
+  const encoded = new TextEncoder().encode(str);
+  const base64 = btoa(String.fromCharCode(...encoded));
+  return `=?UTF-8?B?${base64}?=`;
+}
+
+function buildMimeMessage(data: ApplicationEmailData): string {
+  const boundary = `----=_Part_${Date.now()}_${Math.random().toString(36).slice(2)}`;
+  const subject = `Ny ansökan: ${data.name}`;
+  const textBody = buildTextBody(data);
+  const htmlBody = buildHtmlBody(data);
+
+  const headers = [
+    `From: ${encodeRFC2047(EMAIL.FROM_NAME)} <${EMAIL.FROM}>`,
+    `To: ${EMAIL.TO}`,
+    `Reply-To: ${data.email}`,
+    `Subject: ${encodeRFC2047(subject)}`,
+    'MIME-Version: 1.0',
+    `Content-Type: multipart/alternative; boundary="${boundary}"`,
+    `Date: ${new Date().toUTCString()}`,
+  ].join('\r\n');
+
+  const textPart = [
+    `--${boundary}`,
+    'Content-Type: text/plain; charset=UTF-8',
+    'Content-Transfer-Encoding: 8bit',
+    '',
+    textBody,
+  ].join('\r\n');
+
+  const htmlPart = [
+    `--${boundary}`,
+    'Content-Type: text/html; charset=UTF-8',
+    'Content-Transfer-Encoding: 8bit',
+    '',
+    htmlBody,
+  ].join('\r\n');
+
+  return [headers, '', textPart, htmlPart, `--${boundary}--`].join('\r\n');
+}
+
 export function createApplicationEmail(
   data: ApplicationEmailData
 ): EmailMessage {
-  const msg = createMimeMessage();
-
-  msg.setSender({ name: EMAIL.FROM_NAME, addr: EMAIL.FROM });
-  msg.setRecipient(EMAIL.TO);
-  msg.setHeader('Reply-To', data.email);
-  msg.setSubject(`Ny ansökan: ${data.name}`);
-
-  msg.addMessage({
-    contentType: 'text/html',
-    data: buildHtmlBody(data),
-  });
-
-  msg.addMessage({
-    contentType: 'text/plain',
-    data: buildTextBody(data),
-  });
-
-  return new EmailMessage(EMAIL.FROM, EMAIL.TO, msg.asRaw());
+  const rawEmail = buildMimeMessage(data);
+  return new EmailMessage(EMAIL.FROM, EMAIL.TO, rawEmail);
 }
 
 export function logEmailPayload(data: ApplicationEmailData): void {
