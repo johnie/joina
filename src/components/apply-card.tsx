@@ -1,4 +1,10 @@
-import { Calendar, CheckCircle, Mail, PauseCircle } from 'lucide-react';
+import {
+  Calendar01Icon,
+  CheckmarkCircle01Icon,
+  Mail01Icon,
+  PauseIcon,
+} from '@hugeicons/core-free-icons';
+import { HugeiconsIcon } from '@hugeicons/react';
 import { ApplicationModal } from '@/components/application-modal';
 import { Button } from '@/components/ui/button';
 import {
@@ -72,14 +78,18 @@ function OpenApplicationCard() {
             variant="outline"
           >
             <a href="mailto:jobb@johnie.se?subject=Ansökan: Personlig Assistent">
-              <Mail />
+              <HugeiconsIcon icon={Mail01Icon} size={16} />
               Skicka via e-post
             </a>
           </Button>
         </CardFooter>
       </Card>
       <div className="not-prose mb-8 flex items-center gap-3 rounded-lg border border-amber-900 bg-amber-950/30 p-4">
-        <Calendar className="h-5 w-5 text-amber-400" />
+        <HugeiconsIcon
+          className="text-amber-400"
+          icon={Calendar01Icon}
+          size={20}
+        />
         <div>
           <p className="font-medium text-sm text-stone-900 dark:text-stone-100">
             Sista ansökningsdag
@@ -99,7 +109,7 @@ function PausedApplicationCard() {
       <Card className="not-prose my-8">
         <CardHeader>
           <CardTitle className="flex items-center gap-2 font-heading text-amber-600 text-xl">
-            <PauseCircle className="h-6 w-6" />
+            <HugeiconsIcon icon={PauseIcon} size={24} />
             Ansökningar pausade
           </CardTitle>
           <CardDescription className="text-stone-700 dark:text-stone-300">
@@ -121,7 +131,7 @@ function PausedApplicationCard() {
         </CardContent>
       </Card>
       <div className="not-prose mb-8 flex items-center gap-3 rounded-lg border border-amber-900 bg-amber-950/30 p-4">
-        <PauseCircle className="h-5 w-5 text-amber-400" />
+        <HugeiconsIcon className="text-amber-400" icon={PauseIcon} size={20} />
         <div>
           <p className="font-medium text-sm text-stone-900 dark:text-stone-100">
             Status
@@ -139,7 +149,7 @@ function ClosedApplicationCard() {
       <Card className="not-prose my-8">
         <CardHeader>
           <CardTitle className="flex items-center gap-2 font-heading text-amber-600 text-xl">
-            <CheckCircle className="h-6 w-6" />
+            <HugeiconsIcon icon={CheckmarkCircle01Icon} size={24} />
             Tjänsten tillsatt
           </CardTitle>
           <CardDescription className="text-stone-700 dark:text-stone-300">
@@ -148,7 +158,11 @@ function ClosedApplicationCard() {
         </CardHeader>
       </Card>
       <div className="not-prose mb-8 flex items-center gap-3 rounded-lg border border-amber-900 bg-amber-950/30 p-4">
-        <CheckCircle className="h-5 w-5 text-amber-400" />
+        <HugeiconsIcon
+          className="text-amber-400"
+          icon={CheckmarkCircle01Icon}
+          size={20}
+        />
         <div>
           <p className="font-medium text-sm text-stone-900 dark:text-stone-100">
             Status

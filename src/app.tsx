@@ -1,6 +1,11 @@
 import { MDXContent } from '@content-collections/mdx/react';
+import {
+  ArrowDown01Icon,
+  Calendar03Icon,
+  WorkIcon,
+} from '@hugeicons/core-free-icons';
+import { HugeiconsIcon } from '@hugeicons/react';
 import { allPages } from 'content-collections';
-import { ArrowDown, CalendarClock, Clock } from 'lucide-react';
 import { ApplyCard } from '@/components/apply-card';
 import { FaqAccordion } from '@/components/faq-accordion';
 import { GodOmsorgLogo } from '@/components/god-omsorg';
@@ -13,8 +18,12 @@ import { Button } from '@/components/ui/button';
 import { APPLICATION_DEADLINE } from './constants/application';
 
 const JOB_HIGHLIGHTS = [
-  { icon: Clock, label: 'Tjänstegrad', value: '50%' },
-  { icon: CalendarClock, label: 'Arbetstider', value: '15:00-19:00, vardagar' },
+  { icon: WorkIcon, label: 'Tjänstegrad', value: '50%' },
+  {
+    icon: Calendar03Icon,
+    label: 'Arbetstider',
+    value: '15:00-19:00, vardagar',
+  },
 ];
 
 const JOB_METADATA = [
@@ -65,7 +74,7 @@ function App() {
           <Button asChild className="gap-2" size="sm">
             <a href="#ansok">
               Ansök nu
-              <ArrowDown className="size-4" />
+              <HugeiconsIcon icon={ArrowDown01Icon} size={16} />
             </a>
           </Button>
         </div>

@@ -1,8 +1,8 @@
-import type { LucideIcon } from 'lucide-react';
+import { HugeiconsIcon, type IconSvgElement } from '@hugeicons/react';
 import { cn } from '@/lib/utils';
 
 export interface HighlightItem {
-  icon: LucideIcon;
+  icon: IconSvgElement;
   label: string;
   value: string;
 }
@@ -25,7 +25,12 @@ export function JobHighlights({ items, className }: JobHighlightsProps) {
           className="flex items-center justify-center gap-2"
           key={item.label}
         >
-          <item.icon aria-hidden="true" className="size-4 text-amber-600" />
+          <HugeiconsIcon
+            aria-hidden="true"
+            className="text-amber-600"
+            icon={item.icon}
+            size={16}
+          />
           <span className="font-semibold text-sm">{item.value}</span>
         </div>
       ))}
