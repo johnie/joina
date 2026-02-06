@@ -6,3 +6,5 @@ export const APPLICATION_PAUSED_MESSAGE =
   'Vi tar en paus med ansökningar just nu. Håll utkik för uppdateringar!';
 export const APPLICATION_CLOSED_MESSAGE =
   'Tjänsten är tillsatt. Tack till alla som sökte!';
+
+export const APPLICATION_FORM_ENABLED = false;
