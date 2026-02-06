@@ -18,6 +18,7 @@ import {
 import {
   APPLICATION_CLOSED_MESSAGE,
   APPLICATION_DEADLINE,
+  APPLICATION_FORM_ENABLED,
   APPLICATION_PAUSED_MESSAGE,
   APPLICATION_STATUS,
 } from '@/constants/application';
@@ -70,7 +71,7 @@ function OpenApplicationCard() {
           </p>
         </CardContent>
         <CardFooter className="flex flex-col gap-2 sm:flex-row">
-          <ApplicationModal />
+          {APPLICATION_FORM_ENABLED && <ApplicationModal />}
           <Button
             asChild
             className="w-full border-teal-600 text-teal-600 hover:bg-teal-50 sm:w-auto dark:border-teal-400 dark:text-teal-400 dark:hover:bg-teal-950"
