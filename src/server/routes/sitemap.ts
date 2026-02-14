@@ -4,24 +4,28 @@ import { BUILD_TIMESTAMP, SEO, SITE_URL } from '@/config';
 export const sitemapRoutes = new Hono();
 
 sitemapRoutes.get('/sitemap.xml', async (c) => {
-  // Import inside handler to avoid global scope async operations
-  const { allPages } = await import('content-collections');
+  const { allJobs } = await import('content-collections');
 
-  const pages = allPages.map((page) => {
-    const slug = page._meta.fileName.replace('.mdx', '');
-    const url = slug === 'index' ? SITE_URL : `${SITE_URL}/${slug}`;
-
-    return `  <url>
-    <loc>${url}</loc>
+  const urls = [
+    `  <url>
+    <loc>${SITE_URL}</loc>
     <lastmod>${BUILD_TIMESTAMP}</lastmod>
     <changefreq>${SEO.DEFAULT_CHANGE_FREQ}</changefreq>
-    <priority>${slug === 'index' ? SEO.HOMEPAGE_PRIORITY : SEO.DEFAULT_PRIORITY}</priority>
-  </url>`;
-  });
+    <priority>${SEO.HOMEPAGE_PRIORITY}</priority>
+  </url>`,
+    ...allJobs.map(
+      (job) => `  <url>
+    <loc>${SITE_URL}/jobb/${job.slug}</loc>
+    <lastmod>${BUILD_TIMESTAMP}</lastmod>
+    <changefreq>${SEO.DEFAULT_CHANGE_FREQ}</changefreq>
+    <priority>${SEO.DEFAULT_PRIORITY}</priority>
+  </url>`
+    ),
+  ];
 
   const sitemap = `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-${pages.join('\n')}
+${urls.join('\n')}
 </urlset>`;
 
   return c.text(sitemap, 200, {
