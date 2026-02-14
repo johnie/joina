@@ -4,6 +4,7 @@ import { HugeiconsIcon } from '@hugeicons/react';
 import { Link, useParams } from '@tanstack/react-router';
 import { allJobs } from 'content-collections';
 import { ApplyCard } from '@/components/apply-card';
+import { EmploymentInfo } from '@/components/employment-info';
 import { FaqAccordion } from '@/components/faq-accordion';
 import { GodOmsorgLogo } from '@/components/god-omsorg';
 import { JobHighlights } from '@/components/job-highlights';
@@ -100,6 +101,7 @@ export function JobDetailPage() {
             title={job.title}
           />
         </section>
+        <EmploymentInfo />
         <JobMetaCard items={metadata} />
       </article>
 
