@@ -1,6 +1,7 @@
 export const API_ENDPOINTS = {
   HEALTH: '/api/health',
   UPLOAD: '/api/upload',
+  OG: '/og',
 } as const;
 
 export const ALLOWED_HTTP_METHODS = ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'];
