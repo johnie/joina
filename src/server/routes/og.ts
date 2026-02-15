@@ -1,5 +1,6 @@
 import { Hono } from 'hono';
-import { ImageResponse, loadGoogleFont } from 'workers-og';
+import { ImageResponse } from 'workers-og';
+import { loadGoogleFontCustom } from '../og/font';
 import { renderOgTemplate } from '../og/template';
 import type { Bindings } from '../types/bindings';
 
@@ -18,16 +19,18 @@ og.get('/:slug', async (c) => {
     return c.notFound();
   }
 
-  const fontData = await loadGoogleFont({
-    family: 'Geist Mono',
-    weight: 400,
-  });
+  const [fontRegularItalic, fontBoldItalic] = await Promise.all([
+    loadGoogleFontCustom('Playfair Display', 400, true),
+    loadGoogleFontCustom('Playfair Display', 700, true),
+  ]);
 
   const html = renderOgTemplate({
     title: job.title,
+    summary: job.summary,
     type: job.type,
     location: job.location,
     percentage: job.percentage,
+    hours: job.hours,
   });
 
   const imgResponse = new ImageResponse(html, {
@@ -35,10 +38,16 @@ og.get('/:slug', async (c) => {
     height: 630,
     fonts: [
       {
-        name: 'Geist Mono',
-        data: fontData,
+        name: 'Playfair Display',
+        data: fontRegularItalic,
         weight: 400,
-        style: 'normal',
+        style: 'italic',
+      },
+      {
+        name: 'Playfair Display',
+        data: fontBoldItalic,
+        weight: 700,
+        style: 'italic',
       },
     ],
   });
