@@ -24,7 +24,7 @@ og.get('/:slug', async (c) => {
     loadGoogleFontCustom('Playfair Display', 700, true),
   ]);
 
-  const html = renderOgTemplate({
+  const element = renderOgTemplate({
     title: job.title,
     summary: job.summary,
     type: job.type,
@@ -33,7 +33,9 @@ og.get('/:slug', async (c) => {
     hours: job.hours,
   });
 
-  const imgResponse = new ImageResponse(html, {
+  // Satori accepts {type, props} element objects at runtime;
+  // workers-og types declare React.ReactNode but the shapes are equivalent
+  const imgResponse = new ImageResponse(element as unknown as React.ReactNode, {
     width: 1200,
     height: 630,
     fonts: [
