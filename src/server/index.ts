@@ -55,15 +55,18 @@ app.get('/jobb/:slug', async (c) => {
     const { allJobs } = await import('content-collections');
     const job = allJobs.find((j) => j.slug === slug);
 
+    if (!c.env.ASSETS) {
+      console.error('ASSETS binding not available');
+      return c.text('Internal Server Error', 500);
+    }
+
     const fetchAsset = (path: string) => {
-      const url = new URL(path, c.req.url);
-      if (c.env.ASSETS) {
-        return c.env.ASSETS.fetch(new Request(url));
-      }
-      return fetch(url);
+      console.log('Fetching asset:', path);
+      return c.env.ASSETS.fetch(new Request(new URL(path, c.req.url)));
     };
 
     if (!job) {
+      console.warn('Job not found for slug:', slug);
       return fetchAsset('/');
     }
 
