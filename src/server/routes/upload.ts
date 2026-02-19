@@ -2,7 +2,6 @@ import { zValidator } from '@hono/zod-validator';
 import { Hono } from 'hono';
 import { z } from 'zod';
 import { FILE_UPLOAD, SUCCESS_MESSAGES, VALIDATION_MESSAGES } from '@/config';
-import { APPLICATION_STATUS } from '@/constants/application';
 import type { Bindings } from '../types/bindings';
 import { createApplicationEmail, logEmailPayload } from '../utils/email';
 import {
@@ -162,15 +161,6 @@ async function uploadFileToR2(
 }
 
 upload.post('/', zValidator('form', JobApplicationSchema), async (c) => {
-  if (APPLICATION_STATUS !== 'open') {
-    return c.json(
-      createErrorResponse(
-        createValidationError('Ansökningar är för närvarande stängda')
-      ),
-      503
-    );
-  }
-
   try {
     const { name, email, phone, files } = c.req.valid('form');
 

@@ -15,15 +15,26 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
-import {
-  APPLICATION_CLOSED_MESSAGE,
-  APPLICATION_DEADLINE,
-  APPLICATION_FORM_ENABLED,
-  APPLICATION_PAUSED_MESSAGE,
-  APPLICATION_STATUS,
-} from '@/constants/application';
 
-function OpenApplicationCard() {
+type ApplicationStatus = 'open' | 'paused' | 'closed';
+
+interface ApplyCardProps {
+  deadline: string;
+  email: string;
+  formEnabled: boolean;
+  status: ApplicationStatus;
+  title: string;
+}
+
+function OpenApplicationCard({
+  deadline,
+  email,
+  formEnabled,
+  title,
+}: ApplyCardProps) {
+  const mailtoSubject = encodeURIComponent(`Ansökan: ${title}`);
+  const mailtoHref = `mailto:${email}?subject=${mailtoSubject}`;
+
   return (
     <>
       <Card className="not-prose my-8">
@@ -59,9 +70,9 @@ function OpenApplicationCard() {
             </p>
             <a
               className="font-semibold text-lg text-teal-600 hover:underline dark:text-teal-400"
-              href="mailto:jobb@johnie.se?subject=Ansökan: Personlig Assistent"
+              href={mailtoHref}
             >
-              jobb@johnie.se
+              {email}
             </a>
           </div>
           <p className="text-stone-600 text-xs italic dark:text-stone-400">
@@ -71,14 +82,14 @@ function OpenApplicationCard() {
           </p>
         </CardContent>
         <CardFooter className="flex flex-col gap-2 sm:flex-row">
-          {APPLICATION_FORM_ENABLED && <ApplicationModal />}
+          {formEnabled && <ApplicationModal />}
           <Button
             asChild
             className="w-full border-teal-600 text-teal-600 hover:bg-teal-50 sm:w-auto dark:border-teal-400 dark:text-teal-400 dark:hover:bg-teal-950"
             size="lg"
             variant="outline"
           >
-            <a href="mailto:jobb@johnie.se?subject=Ansökan: Personlig Assistent">
+            <a href={mailtoHref}>
               <HugeiconsIcon icon={Mail01Icon} size={16} />
               Skicka via e-post
             </a>
@@ -95,16 +106,17 @@ function OpenApplicationCard() {
           <p className="font-medium text-sm text-stone-900 dark:text-stone-100">
             Sista ansökningsdag
           </p>
-          <p className="font-semibold text-amber-400 text-lg">
-            {APPLICATION_DEADLINE}
-          </p>
+          <p className="font-semibold text-amber-400 text-lg">{deadline}</p>
         </div>
       </div>
     </>
   );
 }
 
-function PausedApplicationCard() {
+function PausedApplicationCard({ email, title }: ApplyCardProps) {
+  const mailtoSubject = encodeURIComponent(`Fråga om tjänsten: ${title}`);
+  const mailtoHref = `mailto:${email}?subject=${mailtoSubject}`;
+
   return (
     <>
       <Card className="not-prose my-8">
@@ -114,7 +126,8 @@ function PausedApplicationCard() {
             Ansökningar pausade
           </CardTitle>
           <CardDescription className="text-stone-700 dark:text-stone-300">
-            {APPLICATION_PAUSED_MESSAGE}
+            Vi tar en paus med ansökningar just nu. Håll utkik för
+            uppdateringar!
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -124,9 +137,9 @@ function PausedApplicationCard() {
             </p>
             <a
               className="font-semibold text-lg text-teal-600 hover:underline dark:text-teal-400"
-              href="mailto:jobb@johnie.se?subject=Fråga om tjänsten: Personlig Assistent"
+              href={mailtoHref}
             >
-              jobb@johnie.se
+              {email}
             </a>
           </div>
         </CardContent>
@@ -154,7 +167,7 @@ function ClosedApplicationCard() {
             Tjänsten tillsatt
           </CardTitle>
           <CardDescription className="text-stone-700 dark:text-stone-300">
-            {APPLICATION_CLOSED_MESSAGE}
+            Tjänsten är tillsatt. Tack till alla som sökte!
           </CardDescription>
         </CardHeader>
       </Card>
@@ -175,14 +188,14 @@ function ClosedApplicationCard() {
   );
 }
 
-export function ApplyCard() {
-  if (APPLICATION_STATUS === 'paused') {
-    return <PausedApplicationCard />;
+export function ApplyCard(props: ApplyCardProps) {
+  if (props.status === 'paused') {
+    return <PausedApplicationCard {...props} />;
   }
 
-  if (APPLICATION_STATUS === 'closed') {
+  if (props.status === 'closed') {
     return <ClosedApplicationCard />;
   }
 
-  return <OpenApplicationCard />;
+  return <OpenApplicationCard {...props} />;
 }

@@ -8,7 +8,7 @@ export const jsonLdData: WithContext<JobPosting | WebSite>[] = [
   {
     '@context': 'https://schema.org',
     '@type': 'WebSite',
-    name: 'Johnie söker personlig assistent',
+    name: 'Joina – Lediga tjänster',
     url: 'https://joina.johnie.se',
   },
   {

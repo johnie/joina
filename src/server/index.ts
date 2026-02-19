@@ -2,7 +2,9 @@ import { Hono } from 'hono';
 import { cors } from 'hono/cors';
 import { logger } from 'hono/logger';
 import { ALLOWED_HEADERS, ALLOWED_HTTP_METHODS, API_ENDPOINTS } from '@/config';
+import { rewriteJobMeta } from './middleware/og-rewriter';
 import { rateLimiter } from './middleware/rate-limiter';
+import { ogRoutes } from './routes/og';
 import { robotsRoutes } from './routes/robots';
 import { sitemapRoutes } from './routes/sitemap';
 import { upload } from './routes/upload';
@@ -43,6 +45,34 @@ app.get(API_ENDPOINTS.HEALTH, (c) =>
 );
 
 app.route(API_ENDPOINTS.UPLOAD, upload);
+
+app.route(API_ENDPOINTS.OG, ogRoutes);
+
+// Rewrite OG meta tags for job detail pages
+app.get('/jobb/:slug', async (c) => {
+  try {
+    const slug = c.req.param('slug');
+    const { allJobs } = await import('content-collections');
+    const job = allJobs.find((j) => j.slug === slug);
+
+    const fetchAsset = (path: string) => {
+      const url = new URL(path, c.req.url);
+      if (c.env.ASSETS) {
+        return c.env.ASSETS.fetch(new Request(url));
+      }
+      return fetch(url);
+    };
+
+    if (!job) {
+      return fetchAsset('/');
+    }
+
+    return rewriteJobMeta(job, fetchAsset);
+  } catch (error) {
+    console.error('OG rewriter failed:', error);
+    return c.text('Internal Server Error', 500);
+  }
+});
 
 app.route('/', sitemapRoutes);
 app.route('/', robotsRoutes);

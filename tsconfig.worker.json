@@ -21,7 +21,8 @@
             "@/*": ["./src/*"],
             "content-collections": ["./.content-collections/generated"]
         },
-        "strictNullChecks": true
+        "strictNullChecks": true,
+        "jsx": "react-jsx"
     },
     "include": ["src/server/**/*"]
 }
