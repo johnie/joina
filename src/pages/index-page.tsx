@@ -9,6 +9,8 @@ import { allJobs } from 'content-collections';
 import { GodOmsorgLogo } from '@/components/god-omsorg';
 import { ShaStamp } from '@/components/sha';
 import { Card } from '@/components/ui/card';
+import { SITE_METADATA, SITE_URL } from '@/config';
+import { usePageMeta } from '@/hooks/use-page-meta';
 import { company } from '@/lib/company';
 
 const sortedJobs = allJobs.sort((a, b) => {
@@ -22,6 +24,15 @@ const sortedJobs = allJobs.sort((a, b) => {
 });
 
 export function IndexPage() {
+  usePageMeta({
+    title: `${SITE_METADATA.NAME} – Personlig assistent åt Johnie i Sigtuna/Stockholm`,
+    description:
+      'Bli personlig assistent åt Johnie Hjelm – 34, Head of Engineering på Omni, lever med SMA typ 2. Jobba i Sigtuna, Stockholm och ibland på resande fot.',
+    url: SITE_URL,
+    robots:
+      'index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1',
+  });
+
   return (
     <main className="mx-auto w-full max-w-4xl px-4 py-16" id="main-content">
       <div className="mb-16 text-center">

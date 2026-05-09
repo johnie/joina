@@ -34,6 +34,7 @@ const jobs = defineCollection({
     hours: z.string(),
     percentage: z.string(),
     deadline: z.string(),
+    datePosted: z.string().optional(),
     status: z.enum(['open', 'paused', 'closed']),
     formEnabled: z.boolean().default(false),
     highlights: z.array(

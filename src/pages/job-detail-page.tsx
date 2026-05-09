@@ -13,6 +13,8 @@ import { MDXImage } from '@/components/mdx/image';
 import { MDXLink } from '@/components/mdx/link';
 import { ShaStamp } from '@/components/sha';
 import { Button } from '@/components/ui/button';
+import { SITE_URL } from '@/config';
+import { usePageMeta } from '@/hooks/use-page-meta';
 import { company } from '@/lib/company';
 import { getIcon } from '@/lib/icons';
 
@@ -24,6 +26,24 @@ const MDX_COMPONENTS = {
 export function JobDetailPage() {
   const { slug } = useParams({ strict: false });
   const job = allJobs.find((j) => j.slug === slug);
+
+  let robots: string;
+  if (!job) {
+    robots = 'noindex, nofollow';
+  } else if (job.status === 'closed') {
+    robots = 'noindex, follow';
+  } else {
+    robots =
+      'index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1';
+  }
+
+  usePageMeta({
+    title: job ? `${job.title} – Joina` : 'Sidan hittades inte – Joina',
+    description: job?.summary ?? 'Den här sidan finns inte längre.',
+    url: job ? `${SITE_URL}/jobb/${job.slug}` : SITE_URL,
+    image: job ? `${SITE_URL}/og/${job.slug}.png` : undefined,
+    robots,
+  });
 
   if (!job) {
     return (
