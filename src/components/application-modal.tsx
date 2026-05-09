@@ -322,9 +322,9 @@ export function ApplicationModal() {
                   </FileUploadDropzone>
                   {field.state.value.length > 0 && (
                     <FileUploadList>
-                      {field.state.value.map((file, index) => (
+                      {field.state.value.map((file) => (
                         <FileUploadItem
-                          key={`${file.name}-${index}`}
+                          key={`${file.name}-${file.size}-${file.lastModified}`}
                           value={file}
                         >
                           <FileUploadItemPreview />

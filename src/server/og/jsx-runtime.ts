@@ -1,8 +1,8 @@
 type Child = SatoriElement | string | number | boolean | null | undefined;
 
 interface SatoriElement {
-  type: string | typeof Fragment;
   props: Record<string, unknown> & { children?: Child | Child[] };
+  type: string | typeof Fragment;
 }
 
 export function jsx(

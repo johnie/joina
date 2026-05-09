@@ -1,16 +1,16 @@
 import { FILE_UPLOAD } from '@/config';
 
 export interface FileValidationResult {
-  validFiles: File[];
   errors: Array<{ file: File; message: string }>;
+  validFiles: File[];
 }
 
 export interface FileValidationOptions {
-  currentFiles: File[];
-  newFiles: File[];
   accept?: string;
+  currentFiles: File[];
   maxFiles?: number;
   maxSize?: number;
+  newFiles: File[];
 }
 
 /**

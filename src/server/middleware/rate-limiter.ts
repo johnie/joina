@@ -9,9 +9,9 @@ interface RateLimitStore {
 }
 
 interface RateLimiterOptions {
-  windowMs: number; // Time window in milliseconds
-  limit: number; // Max requests per window
   keyGenerator: (c: Context) => string; // Function to generate unique key per client
+  limit: number; // Max requests per window
+  windowMs: number; // Time window in milliseconds
 }
 
 // In-memory store for rate limiting

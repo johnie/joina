@@ -11,9 +11,15 @@ import { ShaStamp } from '@/components/sha';
 import { Card } from '@/components/ui/card';
 import { company } from '@/lib/company';
 
-const sortedJobs = allJobs
-  .filter((job) => job.status !== 'closed')
-  .sort((a, b) => a.order - b.order);
+const sortedJobs = allJobs.sort((a, b) => {
+  if (a.status === 'closed' && b.status !== 'closed') {
+    return 1;
+  }
+  if (b.status === 'closed' && a.status !== 'closed') {
+    return -1;
+  }
+  return a.order - b.order;
+});
 
 export function IndexPage() {
   return (
@@ -32,54 +38,76 @@ export function IndexPage() {
           Öppna tjänster
         </h2>
         <div className="flex flex-col gap-4">
-          {sortedJobs.map((job) => (
-            <Link
-              className="group block"
-              key={job.slug}
-              params={{ slug: job.slug }}
-              to="/jobb/$slug"
-            >
-              <Card className="transition-all duration-200 hover:border-teal-500/50 hover:bg-accent/50 hover:shadow-md">
-                <div className="space-y-3 px-6">
-                  <div className="flex items-center gap-2 text-muted-foreground text-xs">
-                    <span>{job.type}</span>
-                    <span className="text-amber-600">·</span>
-                    <span>{job.location}</span>
+          {sortedJobs.map((job) => {
+            const isClosed = job.status === 'closed';
+            return (
+              <Link
+                className="group block"
+                key={job.slug}
+                params={{ slug: job.slug }}
+                to="/jobb/$slug"
+              >
+                <Card
+                  className={
+                    isClosed
+                      ? 'opacity-60 transition-all duration-200 hover:border-stone-500/50 hover:opacity-80'
+                      : 'transition-all duration-200 hover:border-teal-500/50 hover:bg-accent/50 hover:shadow-md'
+                  }
+                >
+                  <div className="space-y-3 px-6">
+                    <div className="flex items-center gap-2 text-muted-foreground text-xs">
+                      <span>{job.type}</span>
+                      <span className="text-amber-600">·</span>
+                      <span>{job.location}</span>
+                      {isClosed && (
+                        <span className="ml-auto rounded-full border border-stone-400/40 bg-stone-200/50 px-2 py-0.5 font-medium text-[10px] text-stone-700 uppercase tracking-wide dark:bg-stone-800/50 dark:text-stone-300">
+                          Tillsatt
+                        </span>
+                      )}
+                    </div>
+                    <h3
+                      className={
+                        isClosed
+                          ? 'font-heading text-2xl text-stone-500 line-through decoration-1 decoration-stone-400/60 transition-colors'
+                          : 'font-heading text-2xl text-amber-600 transition-colors group-hover:text-teal-500'
+                      }
+                    >
+                      {job.title}
+                    </h3>
+                    <p className="text-muted-foreground text-sm">
+                      {job.summary}
+                    </p>
+                    <div className="flex flex-wrap gap-4 pt-1 text-muted-foreground text-sm">
+                      <span className="flex items-center gap-1.5">
+                        <HugeiconsIcon
+                          className="text-amber-600"
+                          icon={WorkIcon}
+                          size={14}
+                        />
+                        {job.percentage}
+                      </span>
+                      <span className="flex items-center gap-1.5">
+                        <HugeiconsIcon
+                          className="text-amber-600"
+                          icon={Calendar03Icon}
+                          size={14}
+                        />
+                        {job.hours}
+                      </span>
+                      <span className="flex items-center gap-1.5">
+                        <HugeiconsIcon
+                          className="text-amber-600"
+                          icon={Location01Icon}
+                          size={14}
+                        />
+                        {job.location}
+                      </span>
+                    </div>
                   </div>
-                  <h3 className="font-heading text-2xl text-amber-600 transition-colors group-hover:text-teal-500">
-                    {job.title}
-                  </h3>
-                  <p className="text-muted-foreground text-sm">{job.summary}</p>
-                  <div className="flex flex-wrap gap-4 pt-1 text-muted-foreground text-sm">
-                    <span className="flex items-center gap-1.5">
-                      <HugeiconsIcon
-                        className="text-amber-600"
-                        icon={WorkIcon}
-                        size={14}
-                      />
-                      {job.percentage}
-                    </span>
-                    <span className="flex items-center gap-1.5">
-                      <HugeiconsIcon
-                        className="text-amber-600"
-                        icon={Calendar03Icon}
-                        size={14}
-                      />
-                      {job.hours}
-                    </span>
-                    <span className="flex items-center gap-1.5">
-                      <HugeiconsIcon
-                        className="text-amber-600"
-                        icon={Location01Icon}
-                        size={14}
-                      />
-                      {job.location}
-                    </span>
-                  </div>
-                </div>
-              </Card>
-            </Link>
-          ))}
+                </Card>
+              </Link>
+            );
+          })}
         </div>
       </section>
 

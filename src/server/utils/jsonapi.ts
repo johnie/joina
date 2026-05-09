@@ -2,14 +2,12 @@
  * JSON API Error Object
  */
 export interface JsonApiError {
-  /** HTTP status code as a string */
-  status: string;
   /** Application-specific error code */
   code?: string;
-  /** Short, human-readable summary of the problem */
-  title?: string;
   /** Human-readable explanation specific to this occurrence */
   detail: string;
+  /** Non-standard meta-information about the error */
+  meta?: Record<string, unknown>;
   /** Reference to the source of the error */
   source?: {
     /** JSON Pointer to the value in the request that caused the error */
@@ -19,8 +17,10 @@ export interface JsonApiError {
     /** Request header that caused the error */
     header?: string;
   };
-  /** Non-standard meta-information about the error */
-  meta?: Record<string, unknown>;
+  /** HTTP status code as a string */
+  status: string;
+  /** Short, human-readable summary of the problem */
+  title?: string;
 }
 
 /**

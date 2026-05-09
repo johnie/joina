@@ -8,8 +8,8 @@ export interface HighlightItem {
 }
 
 export interface JobHighlightsProps {
-  items: HighlightItem[];
   className?: string;
+  items: HighlightItem[];
 }
 
 export function JobHighlights({ items, className }: JobHighlightsProps) {

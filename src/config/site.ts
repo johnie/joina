@@ -2,8 +2,8 @@ export const SITE_URL = 'https://joina.johnie.se';
 
 export const SITE_METADATA = {
   NAME: 'Joina',
-  TITLE: 'Joina - Jobbansökningar',
-  DESCRIPTION: 'Ansök om lediga tjänster',
+  TITLE: 'Joina – Personlig assistent åt Johnie',
+  DESCRIPTION: 'Bli personlig assistent åt Johnie Hjelm i Sigtuna/Stockholm',
 } as const;
 
 export const SEO = {

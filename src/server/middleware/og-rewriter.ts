@@ -1,9 +1,9 @@
 import { SITE_URL } from '@/config';
 
 interface JobMeta {
-  title: string;
-  summary: string;
   slug: string;
+  summary: string;
+  title: string;
 }
 
 class MetaRewriter {
