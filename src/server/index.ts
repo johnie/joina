@@ -2,7 +2,7 @@ import { Hono } from 'hono';
 import { cors } from 'hono/cors';
 import { logger } from 'hono/logger';
 import { ALLOWED_HEADERS, ALLOWED_HTTP_METHODS, API_ENDPOINTS } from '@/config';
-import { rewriteJobMeta } from './middleware/og-rewriter';
+import { rewriteJobMeta, rewriteJobNotFound } from './middleware/og-rewriter';
 import { rateLimiter } from './middleware/rate-limiter';
 import { ogRoutes } from './routes/og';
 import { robotsRoutes } from './routes/robots';
@@ -52,7 +52,7 @@ app.route(API_ENDPOINTS.OG, ogRoutes);
 app.get('/jobb/:slug', async (c) => {
   try {
     const slug = c.req.param('slug');
-    const { allJobs } = await import('content-collections');
+    const { allJobs, allQnas } = await import('content-collections');
     const job = allJobs.find((j) => j.slug === slug);
 
     if (!c.env.ASSETS) {
@@ -60,17 +60,15 @@ app.get('/jobb/:slug', async (c) => {
       return c.text('Internal Server Error', 500);
     }
 
-    const fetchAsset = (path: string) => {
-      console.log('Fetching asset:', path);
-      return c.env.ASSETS.fetch(new Request(new URL(path, c.req.url)));
-    };
+    const fetchAsset = (path: string) =>
+      c.env.ASSETS.fetch(new Request(new URL(path, c.req.url)));
 
     if (!job) {
       console.warn('Job not found for slug:', slug);
-      return fetchAsset('/');
+      return rewriteJobNotFound(fetchAsset);
     }
 
-    return rewriteJobMeta(job, fetchAsset);
+    return rewriteJobMeta(job, allQnas, fetchAsset);
   } catch (error) {
     console.error('OG rewriter failed:', error);
     return c.text('Internal Server Error', 500);
