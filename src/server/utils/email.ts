@@ -2,12 +2,12 @@ import { EmailMessage } from 'cloudflare:email';
 import { EMAIL } from '@/config';
 
 interface ApplicationEmailData {
-  name: string;
   email: string;
-  phone: string;
   fileCount: number;
-  submittedAt: string;
   folderId: string;
+  name: string;
+  phone: string;
+  submittedAt: string;
 }
 
 function formatDate(isoString: string): string {

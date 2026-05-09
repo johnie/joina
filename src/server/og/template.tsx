@@ -1,12 +1,12 @@
 /** @jsxImportSource . */
 
 interface OgTemplateData {
-  title: string;
-  summary: string;
-  type: string;
+  hours: string;
   location: string;
   percentage: string;
-  hours: string;
+  summary: string;
+  title: string;
+  type: string;
 }
 
 const svgProps = {

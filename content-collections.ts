@@ -67,5 +67,5 @@ const qna = defineCollection({
 });
 
 export default defineConfig({
-  collections: [pages, jobs, qna],
+  content: [pages, jobs, qna],
 });

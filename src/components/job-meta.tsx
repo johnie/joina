@@ -12,10 +12,10 @@ export interface MetaItem {
 }
 
 export interface JobMetaCardProps {
-  /** Pairs shown in order, left column are labels, right column are values */
-  items: MetaItem[];
   /** Extra classes to style the wrapper */
   className?: string;
+  /** Pairs shown in order, left column are labels, right column are values */
+  items: MetaItem[];
 }
 
 export function JobMetaCard({ items, className }: JobMetaCardProps) {
@@ -23,10 +23,10 @@ export function JobMetaCard({ items, className }: JobMetaCardProps) {
     <Card className={cn('bg-muted', className)}>
       <CardContent>
         <dl className="mt-0 mb-0 flex flex-wrap items-center justify-center">
-          {items.map((item, i) => (
+          {items.map((item) => (
             <div
               className="flex w-full items-center justify-between"
-              key={`${String(item.label)}-${i}`}
+              key={String(item.label)}
             >
               <dt className="mt-0 p-0 font-semibold text-sm">{item.label}</dt>
               <dd className="mt-0 p-0 text-sm leading-relaxed">{item.value}</dd>
